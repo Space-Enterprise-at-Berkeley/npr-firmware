@@ -18,6 +18,8 @@ byte mac[] = {
 };
 #endif
 
+IPAddress ground1(10, 0, 0, 69);
+IPAddress ground2(10, 0, 0, 70);
 unsigned int port = 42069;  
 EthernetUDP Udp;
 
@@ -99,7 +101,11 @@ void loop() {
 
     Serial.println("Forwarding through ethernet...");
 
-    Udp.beginPacket(ip, port);
+    Udp.beginPacket(ground1, port);
+    Udp.write(packetBuffer, *packetLen);
+    Udp.endPacket();
+
+    Udp.beginPacket(ground2, port);
     Udp.write(packetBuffer, *packetLen);
     Udp.endPacket();
   }
