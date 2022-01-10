@@ -99,6 +99,10 @@ void loop() {
     Serial.print("Contents:");
     Serial.println(packetBuffer);
 
+    uint8_t lastRssi = (uint8_t)rf24.lastRssi();
+    Serial.print("RSSI:" );
+    Serial.println(lastRssi);
+
     Serial.println("Forwarding through ethernet...");
 
     Udp.beginPacket(ground1, port);
