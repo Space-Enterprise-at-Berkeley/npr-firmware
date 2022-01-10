@@ -44,7 +44,7 @@ void setup()
   #endif
 
   Ethernet.begin(mac, ip);
-  Ethernet.init();
+  Ethernet.init(PA11);
     if (Ethernet.hardwareStatus() == EthernetNoHardware) {
     Serial.println("Unable to connect to ethernet module");
     while (true) {
