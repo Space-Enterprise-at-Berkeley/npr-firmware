@@ -175,39 +175,3 @@ bool EthernetClient::operator==(const EthernetClient& rhs)
 	if (rhs._sockindex >= MAX_SOCK_NUM) return false;
 	return true;
 }
-
-// https://github.com/per1234/EthernetMod
-// from: https://github.com/ntruchsess/Arduino-1/commit/937bce1a0bb2567f6d03b15df79525569377dabd
-uint16_t EthernetClient::localPort()
-{
-	if (_sockindex >= MAX_SOCK_NUM) return 0;
-	uint16_t port;
-	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
-	port = W5100.readSnPORT(_sockindex);
-	SPI.endTransaction();
-	return port;
-}
-
-// https://github.com/per1234/EthernetMod
-// returns the remote IP address: https://forum.arduino.cc/index.php?topic=82416.0
-IPAddress EthernetClient::remoteIP()
-{
-	if (_sockindex >= MAX_SOCK_NUM) return IPAddress((uint32_t)0);
-	uint8_t remoteIParray[4];
-	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
-	W5100.readSnDIPR(_sockindex, remoteIParray);
-	SPI.endTransaction();
-	return IPAddress(remoteIParray);
-}
-
-// https://github.com/per1234/EthernetMod
-// from: https://github.com/ntruchsess/Arduino-1/commit/ca37de4ba4ecbdb941f14ac1fe7dd40f3008af75
-uint16_t EthernetClient::remotePort()
-{
-	if (_sockindex >= MAX_SOCK_NUM) return 0;
-	uint16_t port;
-	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
-	port = W5100.readSnDPORT(_sockindex);
-	SPI.endTransaction();
-	return port;
-}

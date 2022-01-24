@@ -26,9 +26,10 @@ EthernetUDP Udp;
 void setup() 
 {
   Serial.begin(115200);
-
-  Ethernet.begin(mac, ip);
+  
   Ethernet.init(PA11);
+  Ethernet.begin(mac, ip);
+  
     if (Ethernet.hardwareStatus() == EthernetNoHardware) {
     Serial.println("Unable to connect to ethernet module");
     while (true) {
@@ -59,16 +60,13 @@ void setup()
   #endif
 }
  
-char packetBuffer[3] = {'S', 'E', 'B'}; 
+char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; 
 // char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; 
 uint8_t packetLen;
 
 void loop() {
-  Serial.println(Ethernet.hardwareStatus());
   #ifdef TX
-  // packetLen = Udp.parsePacket();
-  packetLen = 3;
-  Serial.println(packetLen);
+  packetLen = Udp.parsePacket();
   if (packetLen) {
     Serial.print("Received ethernet packet of size ");
     Serial.println(packetLen);
@@ -84,7 +82,7 @@ void loop() {
     Serial.println(Udp.remotePort());
 
     // read the packet into packetBufffer
-    //Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+    Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
     Serial.print("Contents:");
     Serial.println(packetBuffer);
 
@@ -97,7 +95,6 @@ void loop() {
   }
   #else
   bool received = rf24.recv((uint8_t *) packetBuffer, &packetLen);
-  Serial.println(rf24.get_battery_voltage());
   if(received){
     Serial.print("Received radio packet of size ");
     Serial.println(packetLen);
@@ -111,13 +108,9 @@ void loop() {
 
     Serial.println("Forwarding through ethernet...");
 
-    // Udp.beginPacket(ground1, port);
-    // Udp.write(packetBuffer, packetLen);
-    // Udp.endPacket();
-
-    // Udp.beginPacket(ground2, port);
-    // Udp.write(packetBuffer, packetLen);
-    // Udp.endPacket();
+    Udp.beginPacket(ground1, port);
+    Udp.write(packetBuffer, packetLen);
+    Udp.endPacket();
   }
   #endif
 }

@@ -299,8 +299,8 @@ bool RH_RF24::recv(uint8_t* buf, uint8_t* len)
     if (buf && len && (_bufLen >= RH_RF24_HEADER_LEN))
     {
 	ATOMIC_BLOCK_START;
-	if (*len > _bufLen - RH_RF24_HEADER_LEN)
-	    *len = _bufLen - RH_RF24_HEADER_LEN;
+	// if (*len > _bufLen - RH_RF24_HEADER_LEN)
+	*len = _bufLen - RH_RF24_HEADER_LEN;
 	memcpy(buf, _buf + RH_RF24_HEADER_LEN, *len);
 	ATOMIC_BLOCK_END;
     }

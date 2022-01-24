@@ -52,6 +52,7 @@
 #include "Client.h"
 #include "Server.h"
 #include "Udp.h"
+#include <SPI.h>
 
 enum EthernetLinkStatus {
 	Unknown,
