@@ -11,11 +11,11 @@
 // See RF24configs/README for file name encoding standard
 //#include "RF24configs/radio_config_Si4464_27_434_2GFSK_5_10.h"
 //#include "RF24configs/radio_config_Si4464_30_434_2GFSK_5_10.h"
-//#include "RF24configs/radio_config_Si4464_30_434_2GFSK_10_20.h"
+#include "RF24configs/radio_config_Si4464_30_434_2GFSK_10_20.h"
 //#include "RF24configs/radio_config_Si4464_30_915_2GFSK_5_10.h"
 //#include "RF24configs/radio_config_Si4464_30_915_2GFSK_10_20.h"
 
-#include "radio_config_Si4463.h"
+//#include "radio_config_Si4463.h"
 
 // Interrupt vectors for the 3 Arduino interrupt pins
 // Each interrupt can be handled by a different instance of RH_RF24, allowing you to have

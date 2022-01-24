@@ -26,22 +26,6 @@ EthernetUDP Udp;
 void setup() 
 {
   Serial.begin(115200);
-  if (!rf24.init()) Serial.println("init failed");
-  // The default radio config is for 30MHz Xtal, 434MHz base freq 2GFSK 5kbps 10kHz deviation
-  // power setting 0x10
-  // If you want a different frequency mand or modulation scheme, you must generate a new
-  // radio config file as per the RH_RF24 module documentation and recompile
-  // You can change a few other things programatically:
-  rf24.setFrequency(433.0); // Only within the same frequency band
-  rf24.setTxPower(0x10);
-
-  #ifdef TX
-  rf24.setModeTx();
-  Serial.println("Starting in transmit mode");
-  #else
-  rf24.setModeRx();
-  Serial.println("Starting in transmit mode");
-  #endif
 
   Ethernet.begin(mac, ip);
   Ethernet.init(PA11);
@@ -56,17 +40,38 @@ void setup()
   }
 
   Udp.begin(port);
+
+  if (!rf24.init()) Serial.println("init failed");
+  // The default radio config is for 30MHz Xtal, 434MHz base freq 2GFSK 5kbps 10kHz deviation
+  // power setting 0x10
+  // If you want a different frequency mand or modulation scheme, you must generate a new
+  // radio config file as per the RH_RF24 module documentation and recompile
+  // You can change a few other things programatically:
+  rf24.setFrequency(433.0); // Only within the same frequency band
+  rf24.setTxPower(0x10);
+
+  #ifdef TX
+  rf24.setModeTx();
+  Serial.println("Starting in transmit mode");
+  #else
+  rf24.setModeRx();
+  Serial.println("Starting in receive mode");
+  #endif
 }
  
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; 
-uint8_t * packetLen;
+char packetBuffer[3] = {'S', 'E', 'B'}; 
+// char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; 
+uint8_t packetLen;
 
 void loop() {
+  Serial.println(Ethernet.hardwareStatus());
   #ifdef TX
-  *packetLen = Udp.parsePacket();
-  if (*packetLen) {
+  // packetLen = Udp.parsePacket();
+  packetLen = 3;
+  Serial.println(packetLen);
+  if (packetLen) {
     Serial.print("Received ethernet packet of size ");
-    Serial.println(*packetLen);
+    Serial.println(packetLen);
     Serial.print("From ");
     IPAddress remote = Udp.remoteIP();
     for (int i=0; i < 4; i++) {
@@ -79,22 +84,23 @@ void loop() {
     Serial.println(Udp.remotePort());
 
     // read the packet into packetBufffer
-    Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+    //Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
     Serial.print("Contents:");
     Serial.println(packetBuffer);
 
     Serial.println("Forwarding over radio...");
 
-    bool success = rf24.send((uint8_t *) packetBuffer, *packetLen);
+    bool success = rf24.send((uint8_t *) packetBuffer, packetLen);
     if(!success){
       Serial.println("Error forwarding packet over radio");
     }
   }
   #else
-  bool received = rf24.recv((uint8_t *) packetBuffer, packetLen);
+  bool received = rf24.recv((uint8_t *) packetBuffer, &packetLen);
+  Serial.println(rf24.get_battery_voltage());
   if(received){
     Serial.print("Received radio packet of size ");
-    Serial.println(*packetLen);
+    Serial.println(packetLen);
 
     Serial.print("Contents:");
     Serial.println(packetBuffer);
@@ -105,13 +111,13 @@ void loop() {
 
     Serial.println("Forwarding through ethernet...");
 
-    Udp.beginPacket(ground1, port);
-    Udp.write(packetBuffer, *packetLen);
-    Udp.endPacket();
+    // Udp.beginPacket(ground1, port);
+    // Udp.write(packetBuffer, packetLen);
+    // Udp.endPacket();
 
-    Udp.beginPacket(ground2, port);
-    Udp.write(packetBuffer, *packetLen);
-    Udp.endPacket();
+    // Udp.beginPacket(ground2, port);
+    // Udp.write(packetBuffer, packetLen);
+    // Udp.endPacket();
   }
   #endif
 }
