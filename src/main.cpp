@@ -49,7 +49,7 @@ void setup()
   // radio config file as per the RH_RF24 module documentation and recompile
   // You can change a few other things programatically:
   rf24.setFrequency(433.0); // Only within the same frequency band
-  rf24.setTxPower(0x10);
+  rf24.setTxPower(0x20);
 
   #ifdef TX
   rf24.setModeTx();
@@ -72,21 +72,22 @@ void loop() {
   #ifdef TX
   packetLen = Udp.parsePacket();
   if (packetLen) {
-    Serial.print("Received ethernet packet of size ");
-    Serial.println(packetLen);
-    Serial.print("From ");
-    IPAddress remote = Udp.remoteIP();
-    for (int i=0; i < 4; i++) {
-      Serial.print(remote[i], DEC);
-      if (i < 3) {
-        Serial.print(".");
-      }
-    }
-    Serial.print(", port ");
-    Serial.println(Udp.remotePort());
+    //Serial.print("Received ethernet packet of size ");
+    //Serial.println(packetLen);
+    // Serial.print("From ");
+    // IPAddress remote = Udp.remoteIP();
+    // for (int i=0; i < 4; i++) {
+    //   Serial.print(remote[i], DEC);
+    //   if (i < 3) {
+    //     Serial.print(".");
+    //   }
+    // }
+    //Serial.print(", port ");
+    //Serial.println(Udp.remotePort());
 
     if(UDP_BUF_IDX + packetLen > 250){
-      bool success = rf24.send((uint8_t *) packetBuffer, UDP_BUF_IDX);
+      bool success = rf24.send((uint8_t *) UDP_RX_BUF, UDP_BUF_IDX);
+      Serial.println("Forwarding packet over radio");
       if(!success){
         Serial.println("Error forwarding packet over radio");
       }
@@ -94,13 +95,13 @@ void loop() {
     }
 
     Udp.read(packetBuffer, packetLen);
-    Serial.print("Contents:");
-    Serial.println(packetBuffer);
+    //Serial.print("Contents:");
+    //Serial.println(packetBuffer);
 
     memcpy(UDP_RX_BUF + UDP_BUF_IDX, packetBuffer, packetLen);
     UDP_BUF_IDX += packetLen;
 
-    Serial.print("UDPBuffer is now size:" ); Serial.println(UDP_BUF_IDX);
+    //Serial.print("UDPBuffer is now size:" ); Serial.println(UDP_BUF_IDX);
   }
 
   #else
@@ -110,7 +111,7 @@ void loop() {
     Serial.println(packetLen);
 
     Serial.print("Contents:");
-    Serial.println(RADIO_RX_BUF[20]);
+    Serial.println(RADIO_RX_BUF);
 
     uint8_t lastRssi = (uint8_t)rf24.lastRssi();
     Serial.print("RSSI:" );
@@ -122,9 +123,9 @@ void loop() {
     while(idx<250){
       memcpy(packetBuffer, RADIO_RX_BUF + idx, 20);
       idx += 20;
-      // Udp.beginPacket(ground1, port);
-      // Udp.write(packetBuffer, 20);
-      // Udp.endPacket();
+      Udp.beginPacket(ground2, port);
+      Udp.write(packetBuffer, 20);
+      Udp.endPacket();
     }
   }
   #endif
