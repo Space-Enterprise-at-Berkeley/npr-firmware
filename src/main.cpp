@@ -60,8 +60,12 @@ void setup()
   #endif
 }
  
+char UDP_RX_BUF[250];
+int UDP_BUF_IDX = 0;
+char RADIO_RX_BUF[250];
+int RADIO_BUF_IDX = 0;
+
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; 
-// char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; 
 uint8_t packetLen;
 
 void loop() {
@@ -81,26 +85,32 @@ void loop() {
     Serial.print(", port ");
     Serial.println(Udp.remotePort());
 
-    // read the packet into packetBufffer
-    Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+    if(UDP_BUF_IDX + packetLen > 250){
+      bool success = rf24.send((uint8_t *) packetBuffer, UDP_BUF_IDX);
+      if(!success){
+        Serial.println("Error forwarding packet over radio");
+      }
+      UDP_BUF_IDX = 0;
+    }
+
+    Udp.read(packetBuffer, packetLen);
     Serial.print("Contents:");
     Serial.println(packetBuffer);
 
-    Serial.println("Forwarding over radio...");
+    memcpy(UDP_RX_BUF + UDP_BUF_IDX, packetBuffer, packetLen);
+    UDP_BUF_IDX += packetLen;
 
-    bool success = rf24.send((uint8_t *) packetBuffer, packetLen);
-    if(!success){
-      Serial.println("Error forwarding packet over radio");
-    }
+    Serial.print("UDPBuffer is now size:" ); Serial.println(UDP_BUF_IDX);
   }
+
   #else
-  bool received = rf24.recv((uint8_t *) packetBuffer, &packetLen);
+  bool received = rf24.recv((uint8_t *) RADIO_RX_BUF, &packetLen);
   if(received){
     Serial.print("Received radio packet of size ");
     Serial.println(packetLen);
 
     Serial.print("Contents:");
-    Serial.println(packetBuffer);
+    Serial.println(RADIO_RX_BUF[20]);
 
     uint8_t lastRssi = (uint8_t)rf24.lastRssi();
     Serial.print("RSSI:" );
@@ -108,9 +118,14 @@ void loop() {
 
     Serial.println("Forwarding through ethernet...");
 
-    Udp.beginPacket(ground1, port);
-    Udp.write(packetBuffer, packetLen);
-    Udp.endPacket();
+    int idx = 0;
+    while(idx<250){
+      memcpy(packetBuffer, RADIO_RX_BUF + idx, 20);
+      idx += 20;
+      // Udp.beginPacket(ground1, port);
+      // Udp.write(packetBuffer, 20);
+      // Udp.endPacket();
+    }
   }
   #endif
 }

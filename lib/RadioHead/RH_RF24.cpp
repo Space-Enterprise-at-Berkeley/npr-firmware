@@ -16,6 +16,8 @@
 //#include "RF24configs/radio_config_Si4464_30_915_2GFSK_10_20.h"
 
 //#include "radio_config_Si4463.h"
+//#include "radio_config_Si4463_500kbps_100khz_2GFSK.h"
+//#include "radio_config_Si4463_500kbps_100khz_4GFSK.h"
 
 // Interrupt vectors for the 3 Arduino interrupt pins
 // Each interrupt can be handled by a different instance of RH_RF24, allowing you to have
@@ -585,6 +587,7 @@ void RH_RF24::setModeTx()
     if (_mode != RHModeTx)
     {
 	// Set the antenna switch pins using the GPIO, assuming we have an RFM module with antenna switch
+
 	uint8_t config[] = { RH_RF24_GPIO_LOW, RH_RF24_GPIO_HIGH };
 	command(RH_RF24_CMD_GPIO_PIN_CFG, config, sizeof(config));
 
