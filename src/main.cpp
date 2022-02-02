@@ -65,15 +65,15 @@ int UDP_BUF_IDX = 0;
 char RADIO_RX_BUF[250];
 int RADIO_BUF_IDX = 0;
 
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE]; 
+char packetBuffer[100]; 
 uint8_t packetLen;
 
 void loop() {
   #ifdef TX
   packetLen = Udp.parsePacket();
   if (packetLen) {
-    //Serial.print("Received ethernet packet of size ");
-    //Serial.println(packetLen);
+    // Serial.print("Received ethernet packet of size ");
+    // Serial.println(packetLen);
     // Serial.print("From ");
     // IPAddress remote = Udp.remoteIP();
     // for (int i=0; i < 4; i++) {
@@ -82,10 +82,11 @@ void loop() {
     //     Serial.print(".");
     //   }
     // }
-    //Serial.print(", port ");
-    //Serial.println(Udp.remotePort());
+    // Serial.print(", port ");
+    // Serial.println(Udp.remotePort());
 
     if(UDP_BUF_IDX + packetLen > 250){
+      memset(UDP_RX_BUF + UDP_BUF_IDX, 255, 250-UDP_BUF_IDX);
       bool success = rf24.send((uint8_t *) UDP_RX_BUF, UDP_BUF_IDX);
       Serial.println("Forwarding packet over radio");
       if(!success){
@@ -110,9 +111,6 @@ void loop() {
     Serial.print("Received radio packet of size ");
     Serial.println(packetLen);
 
-    Serial.print("Contents:");
-    Serial.println(RADIO_RX_BUF);
-
     uint8_t lastRssi = (uint8_t)rf24.lastRssi();
     Serial.print("RSSI:" );
     Serial.println(lastRssi);
@@ -121,10 +119,15 @@ void loop() {
 
     int idx = 0;
     while(idx<250){
-      memcpy(packetBuffer, RADIO_RX_BUF + idx, 20);
-      idx += 20;
-      Udp.beginPacket(ground2, port);
-      Udp.write(packetBuffer, 20);
+      int len = RADIO_RX_BUF[idx+1];
+      if(len == 255 || len == 0){
+        break;
+      }
+      Serial.println((int) RADIO_RX_BUF[idx]);
+      memcpy(packetBuffer, RADIO_RX_BUF + idx, len+8);
+      idx += len + 8;
+      Udp.beginPacket(ground1, port);
+      Udp.write(packetBuffer, len + 8);
       Udp.endPacket();
     }
   }

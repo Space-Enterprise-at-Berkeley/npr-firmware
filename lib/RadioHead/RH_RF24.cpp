@@ -16,8 +16,8 @@
 //#include "RF24configs/radio_config_Si4464_30_915_2GFSK_10_20.h"
 
 //#include "radio_config_Si4463.h"
-//#include "radio_config_Si4463_500kbps_100khz_2GFSK.h"
-#include "radio_config_Si4463_100kbps_50khz_2GFSK.h"
+#include "radio_config_Si4463_200kbps_25khz_2GFSK.h"
+//#include "radio_config_Si4463_100kbps_50khz_2GFSK.h"
 
 // Interrupt vectors for the 3 Arduino interrupt pins
 // Each interrupt can be handled by a different instance of RH_RF24, allowing you to have
