@@ -1,21 +1,15 @@
 #pragma once
 
-#include <Comms.h>
-
 #include <Arduino.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 #include <map>
 
 namespace Comms {
+
     const int port = 42069;
     const IPAddress ip(10, 0, 0, IP_ADDRESS_END);
     const IPAddress DAQ1(10, 0, 0, 11);
-
-    enum mode {TX, RX, IDLE};
-    extern mode radioMode;
-
-    extern int txInterval;
 
     #ifdef FLIGHT
     const byte mac[] = {
@@ -52,11 +46,7 @@ namespace Comms {
      */
     void registerCallback(uint8_t id, commFunction function);
 
-    void transmitRadioBuffer(bool swapFlag);
-    void transmitRadioBuffer();
-
     void processWaitingPackets();
-    bool processWaitingRadioPacket();
 
     void packetAddFloat(Packet *packet, float value);
     void packetAddUint8(Packet *packet, uint8_t value);

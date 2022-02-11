@@ -1,28 +1,18 @@
 #include <Arduino.h>
 
-#include<Common.h>
+#include <Common.h>
 #include <Comms.h>
+
+#include <Radio.h>
 
 #include <Ethernet.h>
 #include <EthernetUdp.h>
-#include <RH_RF24.h>
 
 namespace Comms {
-
-    #define MAX_RADIO_TRX_SIZE 249
 
     std::map<uint8_t, commFunction> callbackMap;
     EthernetUDP Udp;
     char packetBuffer[sizeof(Packet)];
-
-    RH_RF24 rf24(PA4, PA3, PA1);
-
-    uint8_t radioBuffer[MAX_RADIO_TRX_SIZE];
-    uint8_t radioBufferSize= 0;
-
-    int txInterval = TX_INT;
-
-    mode radioMode;
 
     void initComms() {
         Serial.begin(115200);
@@ -31,20 +21,6 @@ namespace Comms {
         Ethernet.begin((uint8_t *)mac, ip);
 
         Udp.begin(port);
-
-        rf24.init();
-        rf24.setFrequency(433.0); // Only within the same frequency band
-        rf24.setTxPower(0x10);
-
-        #ifdef FLIGHT
-        rf24.setModeTx();
-        radioMode = TX;
-        DEBUG("Starting in flight mode");
-        #else
-        rf24.setModeRx();
-        radioMode  = RX;
-        DEBUG("Starting in ground mode");
-        #endif
     }
 
     void registerCallback(uint8_t id, commFunction function) {
@@ -79,26 +55,8 @@ namespace Comms {
         }
     }
 
-    void transmitRadioBuffer(bool swapFlag){
-        if(radioBufferSize == 0){
-            return;
-        }
-
-        if(swapFlag){
-            radioBuffer[radioBufferSize] = 255;
-            radioBufferSize++;
-        }
-        bool success = rf24.send(radioBuffer, radioBufferSize);
-        DEBUG("Transmitting Radio Packet\n");
-        if(!success){
-            DEBUG("Error Transmitting Radio Packet");
-        }
-        radioBufferSize = 0;
-    }
-    void transmitRadioBuffer(){ transmitRadioBuffer(false);}
-
-
     void processWaitingPackets() {
+        if(Radio::transmitting) return;
         if(Udp.parsePacket()) {
             if(Udp.remotePort() != port) return; // make sure this packet is for the right port
             if(!(Udp.remoteIP() == ethDestination1) && !(Udp.remoteIP() == ethDestination2)) return; // make sure this packet is from a ground station computer
@@ -107,50 +65,10 @@ namespace Comms {
             Packet *packet = (Packet *)&packetBuffer;
 
             if(!evokeCallbackFunction(packet)){
-                int packetLen = packet->len + 8;
-                if(radioBufferSize + packetLen > MAX_RADIO_TRX_SIZE){
-                    transmitRadioBuffer();
-                }
-
-                memcpy(radioBuffer + radioBufferSize, packetBuffer, packetLen);
-                radioBufferSize += packetLen;
+                Radio::forwardPacket(packet);
             }
         }
     }
-
-    bool processWaitingRadioPacket() {
-        bool received = rf24.recv(radioBuffer, &radioBufferSize);
-        if(received){
-            DEBUG("Received radio packet of size ");
-            DEBUG(radioBufferSize);
-            DEBUG("\n");
-
-            uint8_t lastRssi = (uint8_t)rf24.lastRssi();
-            DEBUG("RSSI:" );
-            DEBUG(lastRssi);
-            DEBUG("\n");
-
-            int idx = 0;
-            while(idx<radioBufferSize){
-                int packetID = radioBuffer[idx];
-                if(packetID == 255){
-                    radioBufferSize = 0;
-                    return true;
-                }
-                int packetLen = radioBuffer[idx+1];
-
-                memcpy(packetBuffer, radioBuffer + idx, packetLen+8);
-
-                idx += packetLen + 8;
-
-                Packet *packet = (Packet *)&packetBuffer;
-
-                emitPacket(packet, false);
-            }
-        }
-        return false;
-    }
-
 
     void packetAddFloat(Packet *packet, float value) {
         uint32_t rawData = * ( uint32_t * ) &value;
@@ -194,7 +112,7 @@ namespace Comms {
      * @param packet Packet to be sent.
      */
     void emitPacket(Packet *packet, bool genHeader = true) {
-
+        
         if(genHeader){
             //add timestamp to struct
             uint32_t timestamp = millis();
