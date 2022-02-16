@@ -24,7 +24,7 @@ namespace Radio {
     void initRadio() {
 
         Si446x_init();
-        Si446x_setTxPower(22);
+        Si446x_setTxPower(127);
         Si446x_setupCallback(SI446X_CBS_SENT, 1); 
 
         #ifdef FLIGHT
