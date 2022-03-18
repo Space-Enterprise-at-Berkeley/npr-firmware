@@ -20,11 +20,13 @@ namespace Radio {
     volatile recvRadio_t recvRadio;
 
     char packetBuffer[sizeof(Comms::Packet)];
+
+    Comms::Packet rssiPacket = {.id = 56};
     
     void initRadio() {
 
         Si446x_init();
-        Si446x_setTxPower(22);
+        Si446x_setTxPower(127);
         Si446x_setupCallback(SI446X_CBS_SENT, 1); 
 
         #ifdef FLIGHT
@@ -94,22 +96,14 @@ namespace Radio {
                 idx += packetLen + 8;
 
                 Comms::Packet *packet = (Comms::Packet *) &packetBuffer;
-
-                if(packet->id == 10){
-                    float rssi = (float) recvRadio.rssi;
-                    uint32_t rawData = * ( uint32_t * ) &rssi;
-                    packet->data[0] = rawData & 0xFF;
-                    packet->data[1] = rawData >> 8 & 0xFF;
-                    packet->data[2] = rawData >> 16 & 0xFF;
-                    packet->data[3] = rawData >> 24 & 0xFF;
-
-                    uint16_t checksum = computePacketChecksum(packet);
-                    packet->checksum[0] = checksum & 0xFF;
-                    packet->checksum[1] = checksum >> 8;
-                }
+                
                 Comms::emitPacket(packet, false);
-
             }
+            float rssi = (float) recvRadio.rssi;
+            rssiPacket.len = 0;
+            Comms::packetAddFloat(&rssiPacket, rssi);
+            Comms::emitPacket(&rssiPacket, true);
+
             recvRadio.ready = 0;
         }
         return false;
