@@ -47,7 +47,7 @@ void setup()
 void loop() {
   #ifdef FLIGHT
   long timeElapsed = millis() - startTime;
-  if(timeElapsed%500 < 450){
+  if(true){
     if(Radio::radioMode == Radio::RX){
       Radio::radioMode = Radio::TX;
     }
@@ -68,8 +68,8 @@ void loop() {
     }
     bool swap = Radio::processWaitingRadioPacket();
     if(swap){
-      Radio::radioMode = Radio::RX;
-      txCutoff = millis() + (25);
+    //   Radio::radioMode = Radio::RX;
+    //   txCutoff = millis() + (25);
     }
   }else{
     if(Radio::radioMode == Radio::RX){
