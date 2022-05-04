@@ -8,7 +8,7 @@ long startTime = 0;
 long txCutoff = 0;
 
 unsigned long previousMillis = 0;
-const long interval = 25;
+const long interval = 15;
 
 Comms::Packet spoofPacket = {.id = 10};
 
