@@ -5,22 +5,13 @@
 
 #include <Radio.h>
 
-#include <Ethernet.h>
-#include <EthernetUdp.h>
-
 namespace Comms {
 
     std::map<uint8_t, commFunction> callbackMap;
-    EthernetUDP Udp;
     char packetBuffer[sizeof(Packet)];
 
     void initComms() {
         Serial.begin(115200);
-  
-        Ethernet.init(PA11);
-        Ethernet.begin((uint8_t *)mac, ip);
-
-        Udp.begin(port);
     }
 
     void registerCallback(uint8_t id, commFunction function) {
@@ -57,17 +48,6 @@ namespace Comms {
 
     void processWaitingPackets() {
         if(Radio::transmitting) return;
-        if(Udp.parsePacket()) {
-            if(Udp.remotePort() != port) return; // make sure this packet is for the right port
-            if(!(Udp.remoteIP() == ethDestination1) && !(Udp.remoteIP() == ethDestination2)) return; // make sure this packet is from a ground station computer
-            Udp.read(packetBuffer, sizeof(Packet));
-
-            Packet *packet = (Packet *)&packetBuffer;
-
-            if(!evokeCallbackFunction(packet)){
-                Radio::forwardPacket(packet);
-            }
-        }
     }
 
     void packetAddFloat(Packet *packet, float value) {
@@ -138,13 +118,13 @@ namespace Comms {
         #endif
 
         //Send over ethernet to both ground stations
-        Udp.beginPacket(ethDestination1, port);
-        Udp.write(packet->id);
-        Udp.write(packet->len);
-        Udp.write(packet->timestamp, 4);
-        Udp.write(packet->checksum, 2);
-        Udp.write(packet->data, packet->len);
-        Udp.endPacket();
+        // Udp.beginPacket(ethDestination1, port);
+        // Udp.write(packet->id);
+        // Udp.write(packet->len);
+        // Udp.write(packet->timestamp, 4);
+        // Udp.write(packet->checksum, 2);
+        // Udp.write(packet->data, packet->len);
+        // Udp.endPacket();
 
         // Udp.beginPacket(ethDestination2, port);
         // Udp.write(packet->id);

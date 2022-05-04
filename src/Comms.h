@@ -1,8 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include <Ethernet.h>
-#include <EthernetUdp.h>
 #include <map>
 
 namespace Comms {

@@ -45,7 +45,7 @@
 		#error "SI446X_INTERRUPTS is 1, but SI446X_IRQ_PORT or SI446X_IRQ_BIT has not been set!"
 	#endif
 #endif
-SPIClass SPI4463(PA7, PA6, PA5);
+SPIClass SPI4463;
 #ifdef ARDUINO
 #define	delay_ms(ms)			delay(ms)
 #define delay_us(us)			delayMicroseconds(us)
@@ -163,7 +163,6 @@ static inline uint8_t cdeselect(void)
 uint8_t Si446x_irq_off()
 {
 #if SI446X_INTERRUPTS != 0
-
 #ifdef ARDUINO
 	detachInterrupt(digitalPinToInterrupt(SI446X_IRQ));
 	isrState_local++;
@@ -481,7 +480,7 @@ void Si446x_init()
 #if SI446X_IRQ != -1
 	pinMode(SI446X_IRQ, INPUT_PULLUP);
 #endif
-	SPI4463.begin();
+	SPI4463.begin(36, 35, 37);
 #else
 	CSN_DDR |= _BV(CSN_BIT);
 	SDN_DDR |= _BV(SDN_BIT);

@@ -50,9 +50,9 @@
 ///////////////////
 
 // Arduino pin assignments
-#define SI446X_CSN			PA4
-#define SI446X_SDN			PA1
-#define SI446X_IRQ			PA3 // This needs to be an interrupt pin
+#define SI446X_CSN			34
+#define SI446X_SDN			21
+#define SI446X_IRQ			26 // This needs to be an interrupt pin
 
 
 

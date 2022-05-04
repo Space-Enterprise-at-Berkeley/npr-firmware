@@ -7,6 +7,11 @@
 long startTime = 0;
 long txCutoff = 0;
 
+unsigned long previousMillis = 0;
+const long interval = 25;
+
+Comms::Packet spoofPacket = {.id = 10};
+
 void SI446X_CB_SENT(void)
 {
     Radio::transmitting = false;
@@ -39,44 +44,31 @@ void SI446X_CB_RXINVALID(int16_t rssi)
 
 void setup() 
 {
-  Comms::initComms();
+  Serial.begin(115200);
   Radio::initRadio();
-  startTime = millis();
+  startTime = millis(); 
+
+  for(int i = 0; i<7;i++){
+    Comms::packetAddFloat(&spoofPacket, 69);
+  }
 }
 
 void loop() {
-  #ifdef FLIGHT
-  long timeElapsed = millis() - startTime;
-  if(timeElapsed%500 < 450){
-    if(Radio::radioMode == Radio::RX){
-      Radio::radioMode = Radio::TX;
-    }
-    Comms::processWaitingPackets();
-  }else{
-    if(Radio::radioMode == Radio::TX){
-      Radio::radioMode = Radio::RX;
-      Si446x_RX(0);
-      Radio::transmitRadioBuffer(true);
-    }
-     Radio::processWaitingRadioPacket();
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval)
+  {
+    previousMillis = currentMillis;
+    uint32_t timestamp = millis();
+    spoofPacket.timestamp[0] = timestamp & 0xFF;
+    spoofPacket.timestamp[1] = (timestamp >> 8) & 0xFF;
+    spoofPacket.timestamp[2] = (timestamp >> 16) & 0xFF;
+    spoofPacket.timestamp[3] = (timestamp >> 24) & 0xFF;
+
+    //calculate and append checksum to struct
+    uint16_t checksum = Comms::computePacketChecksum(&spoofPacket);
+    spoofPacket.checksum[0] = checksum & 0xFF;
+    spoofPacket.checksum[1] = checksum >> 8;
+
+    Radio::forwardPacket(&spoofPacket);
   }
-  #elif GROUND
-  if(millis() > txCutoff){
-    if(Radio::radioMode == Radio::TX){
-      Radio::radioMode = Radio::RX;
-      Si446x_RX(0);
-    }
-    bool swap = Radio::processWaitingRadioPacket();
-    if(swap){
-      Radio::radioMode = Radio::RX;
-      txCutoff = millis() + (25);
-    }
-  }else{
-    if(Radio::radioMode == Radio::RX){
-      Radio::radioMode = Radio::TX;
-    }
-    Comms::processWaitingPackets();
-    Radio::transmitRadioBuffer();
-  }
-  #endif
 }
