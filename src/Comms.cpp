@@ -12,6 +12,8 @@ namespace Comms {
 
     void initComms() {
         Serial.begin(115200);
+        Serial1.begin(115200);
+        Serial.setTimeout(1);
     }
 
     void registerCallback(uint8_t id, commFunction function) {
@@ -48,6 +50,21 @@ namespace Comms {
 
     void processWaitingPackets() {
         if(Radio::transmitting) return;
+        if(Serial1.available()) {
+            Packet *packet = (Packet *)&packetBuffer;
+            packet->id = Serial1.read();
+            packet->len = Serial1.read();
+            // if(Serial1.available() < packet->len + 6){
+            //     while(Serial1.available()) Serial1.read();
+            // }
+            Serial1.readBytes((char*)&packetBuffer+2, 4);
+            Serial1.readBytes((char*)&packetBuffer+6, 2);
+            Serial1.readBytes((char*)&packetBuffer+8, packet->len);
+            
+            if(!evokeCallbackFunction(packet)){
+                Radio::forwardPacket(packet);
+            }
+        }
     }
 
     void packetAddFloat(Packet *packet, float value) {

@@ -44,13 +44,9 @@ void SI446X_CB_RXINVALID(int16_t rssi)
 
 void setup() 
 {
-  Serial.begin(115200);
-  Radio::initRadio();
+  Comms::initComms();
+  //Radio::initRadio();
   startTime = millis(); 
-
-  for(int i = 0; i<7;i++){
-    Comms::packetAddFloat(&spoofPacket, 69);
-  }
 }
 
 void loop() {
@@ -58,17 +54,8 @@ void loop() {
   if (currentMillis - previousMillis >= interval)
   {
     previousMillis = currentMillis;
-    uint32_t timestamp = millis();
-    spoofPacket.timestamp[0] = timestamp & 0xFF;
-    spoofPacket.timestamp[1] = (timestamp >> 8) & 0xFF;
-    spoofPacket.timestamp[2] = (timestamp >> 16) & 0xFF;
-    spoofPacket.timestamp[3] = (timestamp >> 24) & 0xFF;
-
-    //calculate and append checksum to struct
-    uint16_t checksum = Comms::computePacketChecksum(&spoofPacket);
-    spoofPacket.checksum[0] = checksum & 0xFF;
-    spoofPacket.checksum[1] = checksum >> 8;
-
-    Radio::forwardPacket(&spoofPacket);
+    if(Serial1.available()){
+      Serial.println(Serial1.available());
+    }
   }
 }
