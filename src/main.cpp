@@ -8,7 +8,7 @@ long startTime = 0;
 long txCutoff = 0;
 
 unsigned long previousMillis = 0;
-const long interval = 20;
+const long interval = 5;
 
 Comms::Packet spoofPacket = {.id = 10};
 
@@ -45,17 +45,10 @@ void SI446X_CB_RXINVALID(int16_t rssi)
 void setup() 
 {
   Comms::initComms();
-  //Radio::initRadio();
+  Radio::initRadio();
   startTime = millis(); 
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval)
-  {
-    previousMillis = currentMillis;
-    if(Serial1.available()){
-      Serial.println(Serial1.available());
-    }
-  }
+  Comms::processWaitingPackets();
 }

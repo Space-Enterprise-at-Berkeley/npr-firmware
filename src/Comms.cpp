@@ -8,7 +8,8 @@
 namespace Comms {
 
     std::map<uint8_t, commFunction> callbackMap;
-    char packetBuffer[sizeof(Packet)];
+    uint8_t packetBuffer[sizeof(Packet)];
+    uint8_t packetBufferSize= 0;
 
     void initComms() {
         Serial.begin(115200);
@@ -45,24 +46,33 @@ namespace Comms {
             DEBUG("Packet with ID ");
             DEBUG(packet->id);
             DEBUG(" does not have correct checksum!\n");
+            return false;
         }
     }
 
     void processWaitingPackets() {
         if(Radio::transmitting) return;
         if(Serial1.available()) {
-            Packet *packet = (Packet *)&packetBuffer;
-            packet->id = Serial1.read();
-            packet->len = Serial1.read();
-            // if(Serial1.available() < packet->len + 6){
-            //     while(Serial1.available()) Serial1.read();
-            // }
-            Serial1.readBytes((char*)&packetBuffer+2, 4);
-            Serial1.readBytes((char*)&packetBuffer+6, 2);
-            Serial1.readBytes((char*)&packetBuffer+8, packet->len);
-            
+            while(packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
+                packetBuffer[packetBufferSize-2] == 10 && packetBuffer[packetBufferSize-1] == 10)){
+                // Serial.print(packetBufferSize);
+                // Serial.print(',');
+                // Serial.print(packetBuffer[packetBufferSize-3]);
+                // Serial.print(",");
+                // Serial.print(packetBuffer[packetBufferSize-2]);
+                // Serial.print(",");
+                // Serial.print(packetBuffer[packetBufferSize-1]);
+                // Serial.println();
+
+                int serialByte = Serial1.read();
+                if(serialByte == -1) return;
+                packetBuffer[packetBufferSize] = serialByte;
+                packetBufferSize++;
+            }
+            Packet* packet = (Packet*) &packetBuffer; 
             if(!evokeCallbackFunction(packet)){
                 Radio::forwardPacket(packet);
+                packetBufferSize = 0;
             }
         }
     }
