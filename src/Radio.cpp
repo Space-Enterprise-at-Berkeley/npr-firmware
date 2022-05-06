@@ -21,7 +21,7 @@ namespace Radio {
 
     char packetBuffer[sizeof(Comms::Packet)];
 
-    Comms::Packet rssiPacket = {.id = 20};
+    Comms::Packet rssiPacket = {.id = 56};
     
     void initRadio() {
 
