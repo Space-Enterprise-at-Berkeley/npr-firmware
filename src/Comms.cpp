@@ -53,6 +53,7 @@ namespace Comms {
     void processWaitingPackets() {
         if(Radio::transmitting) return;
         if(Serial1.available()) {
+            packetBufferSize = 0;
             while(packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
                 packetBuffer[packetBufferSize-2] == 10 && packetBuffer[packetBufferSize-1] == 10)){
                 // Serial.print(packetBufferSize);
@@ -72,7 +73,6 @@ namespace Comms {
             Packet* packet = (Packet*) &packetBuffer; 
             if(!evokeCallbackFunction(packet)){
                 Radio::forwardPacket(packet);
-                packetBufferSize = 0;
             }
         }
     }

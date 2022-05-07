@@ -24,7 +24,7 @@
 #include "Si446x_config.h"
 #include "Si446x_defs.h"
 
-#include "radio_config_60kbps.h"
+#include "radio_config.h"
 
 #define IDLE_STATE SI446X_IDLE_MODE
 

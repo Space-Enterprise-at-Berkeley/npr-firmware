@@ -13,9 +13,10 @@ namespace Radio {
     int txInterval = TX_INT;
 
     uint8_t radioBuffer[MAX_RADIO_TRX_SIZE];
-    uint8_t radioBufferSize= 0;
+    uint8_t radioBufferSize = 0;
 
     volatile bool transmitting = false;
+    long transmitStart = 0;
 
     volatile recvRadio_t recvRadio;
 
@@ -49,6 +50,8 @@ namespace Radio {
         }
         bool success = Si446x_TX(radioBuffer, radioBufferSize, 0, SI446X_STATE_RX);
         transmitting = true;
+        //digitalWrite(RADIO_LED, LOW);
+        transmitStart = millis();
         DEBUG("Transmitting Radio Packet\n");
         if(!success){
             DEBUG("Error Transmitting Radio Packet");
