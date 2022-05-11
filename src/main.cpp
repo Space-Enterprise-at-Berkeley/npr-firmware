@@ -4,14 +4,6 @@
 #include <Radio.h>
 #include <Si446x.h>
 
-long startTime = 0;
-long txCutoff = 0;
-
-unsigned long previousMillis = 0;
-const long interval = 5;
-
-Comms::Packet spoofPacket = {.id = 10};
-
 void SI446X_CB_SENT(void)
 {
     Radio::transmitting = false;
@@ -46,7 +38,6 @@ void setup()
 {
   Comms::initComms();
   Radio::initRadio();
-  startTime = millis(); 
 }
 
 void loop() {
