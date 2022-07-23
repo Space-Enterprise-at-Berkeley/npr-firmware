@@ -3,7 +3,8 @@
 #include <Comms.h>
 #include <Radio.h>
 #include <Si446x.h>
-
+int arr[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
+int ctr = 0;
 void SI446X_CB_SENT(void)
 {
     Radio::transmitting = false;
@@ -38,8 +39,17 @@ void setup()
 {
   Comms::initComms();
   Radio::initRadio();
+  Serial.println("hi");
 }
-
 void loop() {
+  //Comms::processWaitingPackets();
+
   Comms::processWaitingPackets();
+  //Radio::txCalib10(arr, 0);
+  //delay(1000);
+
+  // Radio::txZeros(33); //tx's [0, 1, 2]
+  // delayMicroseconds(2000000);  
+  // Radio::txZeros(33); //tx's [0, 1, 2]
+  // delayMicroseconds(5000000);
 }

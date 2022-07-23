@@ -28,4 +28,5 @@ namespace Radio {
 
     void forwardPacket(Comms::Packet *packet);
     bool processWaitingRadioPacket();
+    void txCalib10(int a[], int ctr);
 }

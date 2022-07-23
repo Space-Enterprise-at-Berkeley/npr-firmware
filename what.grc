@@ -1,0 +1,877 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: what
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: run
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Not titled yet
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [112, 80.0]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: fname
+  id: variable
+  parameters:
+    comment: ''
+    value: '"firstrealpls"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [872, 8.0]
+    rotation: 0
+    state: true
+- name: fsk_deviation_hz
+  id: variable
+  parameters:
+    comment: ''
+    value: '20000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [592, 64.0]
+    rotation: 0
+    state: true
+- name: num_pts
+  id: variable
+  parameters:
+    comment: ''
+    value: int(samp_rate * 0.2)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 32.0]
+    rotation: 0
+    state: true
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '1000000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 24.0]
+    rotation: 0
+    state: true
+- name: update_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '0.00001'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [464, 24.0]
+    rotation: 0
+    state: true
+- name: analog_noise_source_x_0
+  id: analog_noise_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '1'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    noise_type: analog.GR_GAUSSIAN
+    seed: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [32, 276.0]
+    rotation: 0
+    state: disabled
+- name: analog_quadrature_demod_cf_0
+  id: analog_quadrature_demod_cf
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gain: 3*(samp_rate/(2*math.pi*fsk_deviation_hz))
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [616, 292.0]
+    rotation: 0
+    state: true
+- name: blocks_add_const_vxx_0
+  id: blocks_add_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '-5'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [920, 468.0]
+    rotation: 0
+    state: true
+- name: blocks_complex_to_mag_squared_0
+  id: blocks_complex_to_mag_squared
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [608, 404.0]
+    rotation: 0
+    state: true
+- name: blocks_file_source_0
+  id: blocks_file_source
+  parameters:
+    affinity: ''
+    alias: ''
+    begin_tag: '0'
+    comment: ''
+    file: /Users/sekharm/Desktop/sdring/recordingsfr/lfggg.raw
+    length: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    repeat: 'False'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [24, 384.0]
+    rotation: 0
+    state: enabled
+- name: blocks_moving_average_xx_0
+  id: blocks_moving_average_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    length: '100'
+    max_iter: '10000'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [752, 456.0]
+    rotation: 0
+    state: true
+- name: blocks_multiply_const_xx_0
+  id: blocks_multiply_const_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '100'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 492.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1320, 364.0]
+    rotation: 0
+    state: true
+- name: blocks_null_sink_1
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 228.0]
+    rotation: 0
+    state: disabled
+- name: blocks_null_source_0
+  id: blocks_null_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_source: '[[0,],]'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [104, 492.0]
+    rotation: 0
+    state: disabled
+- name: blocks_throttle_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: samp_rate*3
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 620.0]
+    rotation: 0
+    state: disabled
+- name: blocks_throttle_1
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: samp_rate
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [224, 388.0]
+    rotation: 0
+    state: enabled
+- name: digital_binary_slicer_fb_0
+  id: digital_binary_slicer_fb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [864, 308.0]
+    rotation: 0
+    state: true
+- name: digital_binary_slicer_fb_1
+  id: digital_binary_slicer_fb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1032, 364.0]
+    rotation: 0
+    state: true
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\nimport numpy as np\nfrom gnuradio import gr\nimport time\n\n\
+      def clean(i, cumctr, preval):\n    #f = open(\"/Users/sekharm/wtf.txt\", \"\
+      a\")\n    #print(i, end = \"\", file=f)\n    #f.close()\n    if len(i) == 0:\
+      \ return\n    out = []\n    ctr = 1\n    cumctr = cumctr\n    preval = preval\n\
+      \    while (ctr < len(i)):\n        val = i[ctr]\n        if (val != preval):\n\
+      \            #print(cumctr/25)\n            out += [preval]*int(round(cumctr/25))\n\
+      \            cumctr = 0\n        cumctr += 1\n        ctr += 1\n        preval\
+      \ = val\n    return (\"\".join(out), cumctr, preval)\ndef parse(i, pn):\n  \
+      \  i = \"\".join([str(j) for j in i])\n    try:\n        j = i.index(\"0010110111010100\"\
+      )\n    except:\n        print(\"packet not found\")\n        return 0\n    i\
+      \ = i[j+16:]\n    length = int(i[:8], 2)\n    print(f\"found packet #{pn+1}\
+      \ with length {length}:\", end =\" \")\n    \n    i=i[24:]\n    print(\"0x\"\
+      , end=\" \")\n    for j in range(length):\n        print((\"0\"+hex(int(i[:8],2))[2:])[-2:],\
+      \ end=\" \")\n        i=i[8:]\n    print(\"\")\n    return 1\n   \nclass blk(gr.sync_block):\
+      \  # other base classes are basic_block, decim_block, interp_block\n\n    def\
+      \ __init__(self, output_file_name=\"/dev/null\"):\n        np.set_printoptions(threshold=np.inf)\n\
+      \        gr.sync_block.__init__(\n            self,\n            name='yeet',\
+      \   # will show up in GRC\n            in_sig=[np.byte, np.byte],\n        \
+      \    out_sig=[np.byte]\n        )\n        # if an attribute with the same name\
+      \ as a parameter is found,\n        # a callback is registered (properties work,\
+      \ too).\n        self.output_file_name = output_file_name\n        self.cleanBuffer\
+      \ = \"\"\n        self.fullBuffer = \"\"\n        self.cumPackets = 0\n    \
+      \    self.lastProcessTime = time.time()\n        self.preval = 0\n        self.cumctr\
+      \ = 0\n        #f = open(self.output_file_name, \"w\")\n        #f.close()\n\
+      \n    def work(self, input_items, output_items):\n#        print(f\"hi with\
+      \ {len(input_items[0])} samples\")\n        \n        t1 = (input_items[1][:]\
+      \ == 1)\n        t2 = (input_items[0])[t1]\n        \n        g = str(t2)\n\
+      \        bad = ['[', ']', '\\n', ' ', ',']\n        for i in bad:\n        \
+      \    g = g.replace(i, \"\")\n\n        #g is good str.\n        self.fullBuffer\
+      \ += g\n        \n        if len(self.fullBuffer) > 1000:\n            (shortened,\
+      \ self.cumctr, self.preval) = clean(self.fullBuffer, self.cumctr, self.preval)\n\
+      \            self.fullBuffer = \"\"\n            self.cleanBuffer += shortened\n\
+      \        \n        \n        if ((time.time() - self.lastProcessTime > 0.01)\
+      \ and len(self.cleanBuffer) > 600):\n            #print(self.cleanBuffer)\n\
+      \            self.lastProcessTime = time.time()\n            #print(f\"processing\
+      \ {len(self.cleanBuffer)} bits\")\n            s = self.cleanBuffer\n      \
+      \      seq = \"1010100010110111010100\"\n            res = [i for i in range(len(s))\
+      \ if s.startswith(seq, i)]\n            if (res):\n                for i in\
+      \ range(len(res)-1):\n                    packet = self.cleanBuffer[res[i]:res[i+1]]\n\
+      \                    self.cumPackets += parse(packet, self.cumPackets)\n   \
+      \             self.cleanBuffer = self.cleanBuffer[res[-1]:]\n              \
+      \  #print(self.cleanBuffer)\n        #print(len(output_items[0]))\n\n      \
+      \  \n        #output_items[0][:] = (input_items[0])[temp]\n        \n      \
+      \  #output_items[0][:] = input_items[0] * self.example_param\n        #return\
+      \ len(output_items[0])\n\n        return len(output_items[0])\n\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    output_file_name: '"/Users/sekharm/Desktop/sdring/recordingsfr/" + fname + "_cleaned.txt"'
+  states:
+    _io_cache: ('yeet', 'blk', [('output_file_name', "'/dev/null'")], [('0', 'byte',
+      1), ('1', 'byte', 1)], [('0', 'byte', 1)], '', ['output_file_name'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1136, 196.0]
+    rotation: 0
+    state: true
+- name: epy_block_1
+  id: epy_block
+  parameters:
+    _source_code: "import adi, os\nimport numpy as np\nfrom gnuradio import gr\nimport\
+      \ zmq, time\n\n#def set_freq(i):\n#    s = \"iio_attr -u ip:192.168.2.1 -c ad9361-phy\
+      \ RX_LO frequency \" + str(i)\n#    os.system(s)\n#def set_manual_gain():\n\
+      #    s = \"iio_attr -u ip:192.168.2.1 -c ad9361-phy voltage0 gain_control_mode\
+      \ manual\"\n#    os.system(s)\n#def set_gain_level(i):\n#    s = \"iio_attr\
+      \ -i -u ip:192.168.2.1 -c ad9361-phy voltage0 hardwaregain \" + str(i)\n#  \
+      \  os.system(s)\n#def set_rf_bandwidth(i):\n#    s = \"iio_attr -i -u ip:192.168.2.1\
+      \ -c ad9361-phy voltage0 rf_bandwidth \" + str(i)\n#    os.system(s)\n\nclass\
+      \ blk(gr.sync_block):\n\n\n    def __init__(self):\n        self.sdr = adi.Pluto('ip:192.168.2.1')\n\
+      \        self.sample_rate = int(1e6)\n        self.center_freq = 450008000\n\
+      \        self.num_samps = int(10000)\n\n\n#        set_freq(self.center_freq)\n\
+      #        set_manual_gain()\n#        set_gain_level(30)\n#        set_rf_bandwidth(40000)\n\
+      \        \n        self.sdr.rx_buffer_size = self.num_samps\n#\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='t2',\n            in_sig=[np.float32],\n\
+      \            out_sig=[np.complex64]\n        )\n        self.starting = 1\n\
+      \    def work(self, input_items, output_items):\n        print(\"called\")\n\
+      \        if (self.starting == 1):\n            self.sdr.rx_destroy_buffer()\n\
+      \            self.starting = 0;\n        buf = self.sdr.rx()\n        output_items[0]\
+      \ = buf\n        print(len(buf))\n        return len(output_items[0])\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('t2', 'blk', [], [('0', 'float', 1)], [('0', 'complex', 1)], '', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 316.0]
+    rotation: 0
+    state: disabled
+- name: epy_block_2
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
+      from gnuradio import gr\nimport adi, os, random\n\ndef setinits():\n    commands\
+      \ = [\n                \"iio_attr -i -u ip:192.168.2.1 -c ad9361-phy voltage0\
+      \ sampling_frequency 3000000\"\n                \"iio_attr -i -u ip:192.168.2.1\
+      \ -c ad9361-phy voltage0 gain_control_mode manual\"\n                \"iio_attr\
+      \ -i -u ip:192.168.2.1 -c ad9361-phy voltage0 hardwaregain 71\"\n          \
+      \      \"iio_attr -u ip:192.168.2.1 -c ad9361-phy altvoltage0 frequency 450008000\"\
+      \n    ]\n    print(\"hii\")\n    for i in commands:\n        os.system(i)\n\
+      \    \n\n\n    \n    \n\nclass blk(gr.sync_block):  # other base classes are\
+      \ basic_block, decim_block, interp_block\n    \"\"\"Embedded Python Block example\
+      \ - a simple multiply const\"\"\"\n\n    def __init__(self):  # only default\
+      \ arguments here\n        \"\"\"arguments to this function show up as parameters\
+      \ in GRC\"\"\"\n        gr.sync_block.__init__(\n            self,\n       \
+      \     name='ayo',   # will show up in GRC\n            in_sig=[np.complex64],\n\
+      \            out_sig=[np.complex64]\n        )\n        self.ctr = 0\n     \
+      \   self.sdr = adi.Pluto('ip:192.168.2.1')\n        self.sdr.rx_buffer_size\
+      \ = 50000\n        self.sdr.rx_destroy_buffer()\n        self.starting = 1\n\
+      \        \n        self.startptr = 0\n        self.endptr = 0\n        self.jankbuff\
+      \ = np.zeros(1000000) + 0.0j\n        # if an attribute with the same name as\
+      \ a parameter is found,\n        # a callback is registered (properties work,\
+      \ too).\n    def refillbuffer(self):\n        start, end = self.startptr, self.endptr\n\
+      \        \n        f = self.sdr.rx() / (2**14)\n        self.jankbuff[:end-start]\
+      \ = self.jankbuff[start:end]\n        self.jankbuff[end-start:end-start+50000][:]\
+      \ = f\n        \n        #print(f\"filledbuffer: start: {start}, end: {end},\
+      \ newend: {end-start+4096}\")\n        print(\"refilled buffer\" + str(random.randint(0,\
+      \ 9)))\n        self.endptr = end-start+50000\n        self.startptr = 0\n \
+      \       \n    def work(self, input_items, output_items):\n        if self.starting==1:\n\
+      \            setinits()\n            self.starting = 0\n        \n        \n\
+      \        #print(\"called\")\n        \n        #print(f\"sdrlen {len(recv)},\
+      \ output_items[0]len {len(output_items[0])}, input_items[0] len {len(input_items[0])}\"\
+      )\n        #print(len(output_items[0]))\n        \n        l = len(input_items[0])\n\
+      \        \n        if (self.endptr - self.startptr) < l:\n            self.refillbuffer()\n\
+      \            \n        output_items[0][:] = self.jankbuff[self.startptr:self.startptr+l]\n\
+      \        self.startptr = self.startptr + l\n        #print(output_items[0][:50])\n\
+      \        \n        return len(output_items[0])\n        \n        \n\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('ayo', 'blk', [], [('0', 'complex', 1)], [('0', 'complex', 1)], 'Embedded
+      Python Block example - a simple multiply const', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [240, 508.0]
+    rotation: 0
+    state: disabled
+- name: fir_filter_xxx_0
+  id: fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: '3'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_delay: '0'
+    taps: firdes.low_pass(1, samp_rate*3, 60000, 20000)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [448, 624.0]
+    rotation: 0
+    state: disabled
+- name: freq_xlating_fir_filter_xxx_0
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: '0'
+    comment: ''
+    decim: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0,samp_rate, 37500, 5000)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 316.0]
+    rotation: 0
+    state: true
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '1'
+    size: '1240000'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.00000010'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1000'
+    ymin: '-30'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1064, 460.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_1
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '1'
+    size: '100000'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.000010'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '2'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [712, 572.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_2
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '1'
+    size: '102400'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: complex
+    update_time: '0.00010'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '0.1'
+    ymin: '-0.1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [464, 540.0]
+    rotation: 0
+    state: true
+- name: rational_resampler_xxx_0
+  id: rational_resampler_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: '3'
+    fbw: '0'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    taps: '[]'
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 520.0]
+    rotation: 0
+    state: disabled
+
+connections:
+- [analog_noise_source_x_0, '0', epy_block_1, '0']
+- [analog_quadrature_demod_cf_0, '0', digital_binary_slicer_fb_0, '0']
+- [blocks_add_const_vxx_0, '0', digital_binary_slicer_fb_1, '0']
+- [blocks_add_const_vxx_0, '0', qtgui_time_sink_x_0, '0']
+- [blocks_complex_to_mag_squared_0, '0', blocks_multiply_const_xx_0, '0']
+- [blocks_file_source_0, '0', blocks_throttle_1, '0']
+- [blocks_moving_average_xx_0, '0', blocks_add_const_vxx_0, '0']
+- [blocks_moving_average_xx_0, '0', qtgui_time_sink_x_1, '0']
+- [blocks_multiply_const_xx_0, '0', blocks_moving_average_xx_0, '0']
+- [blocks_null_source_0, '0', epy_block_2, '0']
+- [blocks_throttle_0, '0', fir_filter_xxx_0, '0']
+- [blocks_throttle_1, '0', freq_xlating_fir_filter_xxx_0, '0']
+- [blocks_throttle_1, '0', qtgui_time_sink_x_2, '0']
+- [digital_binary_slicer_fb_0, '0', epy_block_0, '0']
+- [digital_binary_slicer_fb_1, '0', epy_block_0, '1']
+- [epy_block_0, '0', blocks_null_sink_0, '0']
+- [epy_block_1, '0', blocks_null_sink_1, '0']
+- [epy_block_2, '0', rational_resampler_xxx_0, '0']
+- [fir_filter_xxx_0, '0', freq_xlating_fir_filter_xxx_0, '0']
+- [freq_xlating_fir_filter_xxx_0, '0', analog_quadrature_demod_cf_0, '0']
+- [freq_xlating_fir_filter_xxx_0, '0', blocks_complex_to_mag_squared_0, '0']
+- [rational_resampler_xxx_0, '0', freq_xlating_fir_filter_xxx_0, '0']
+- [rational_resampler_xxx_0, '0', qtgui_time_sink_x_2, '0']
+
+metadata:
+  file_format: 1
+  grc_version: 3.10.3.0

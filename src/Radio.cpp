@@ -69,6 +69,20 @@ namespace Radio {
         radioBufferSize += packetLen;
     }
 
+    void txCalib10(int a[], int ctr) {
+        for (int i = 0; i < MAX_RADIO_TRX_SIZE; i++) {
+            radioBuffer[i] = 0;
+        }
+        
+        radioBufferSize = 10;
+        for (int i = 0; i < 10; i++) {
+            radioBuffer[i] = a[i] + ctr;
+        }
+
+        transmitRadioBuffer();
+
+    }
+
     bool processWaitingRadioPacket() {
         if(recvRadio.ready == 1){
             DEBUG("Received radio packet of size ");
