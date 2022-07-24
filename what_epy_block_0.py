@@ -1,9 +1,19 @@
 
 import numpy as np
 from gnuradio import gr
-import time
+import time, socket
+
+ip = "127.0.0.1"
+destip = "10.0.0.42"
+port = 42069
+
+testing_check = True
 
 def clean(i, cumctr, preval):
+    
+    #decimates by a factor of 25-ish to eliminated repeated sampling
+    #should've just sampled slower ¯\_(ツ)_/¯
+    
     #f = open("/Users/sekharm/wtf.txt", "a")
     #print(i, end = "", file=f)
     #f.close()
@@ -14,6 +24,7 @@ def clean(i, cumctr, preval):
     preval = preval
     while (ctr < len(i)):
         val = i[ctr]
+        if val == '': continue
         if (val != preval):
             #print(cumctr/25)
             out += [preval]*int(round(cumctr/25))
@@ -22,7 +33,62 @@ def clean(i, cumctr, preval):
         ctr += 1
         preval = val
     return ("".join(out), cumctr, preval)
-def parse(i, pn):
+    
+def split(self, i):
+
+    #*flight* packets are combined into one radio packet (max 128 bytes)
+    #so this function splits them into flight packets
+    
+    #print(i)
+    sendover(self, i)
+#    packets = []
+#    while (len(i) > 1):
+#        length = i[1]
+#        end = 8 + length #id, len, time(4), checksum(2)
+#        packets.append(i[:end])
+#        i = i[end:]
+#    for i in packets:
+#        print(i)
+#        sendover(self, i)
+
+def testing_add(self, i):
+    self.lastPacketTime = time.time()
+    check = True
+    packet_start = i[0]
+    if (68 < packet_start < 71):
+        f = i[1]
+        for j in range(1, 100):
+            if (i[j] != f+j-1):
+                check = False
+    else:
+        check = False
+    if check : self.testctr+=1
+            
+
+def sendover(self, i):
+    #sends a flight packet to the GS
+    
+    if testing_check:
+        testing_add(self, i)
+    
+    f = list(destip)
+    f = [ord(i) for i in f]
+    f = [len(f)] + f
+    f += i
+    self.sock.sendto(bytes(f), (ip, port))
+    
+def checkPacketTime(self):
+    if (self.testctr == 0): return
+    if (time.time() - self.lastPacketTime) > 3:
+        print(f"last packet {(time.time() - self.lastPacketTime):.1f}s ago: got {self.testctr}/200 packets -> {(self.testctr/2):.2f}%\n")
+        self.testctr = 0
+    
+    
+
+def parse(self, i, pn):
+    
+    #converts binary data to radio packets, removing noise from either side
+    
     i = "".join([str(j) for j in i])
     try:
         j = i.index("0010110111010100")
@@ -30,42 +96,54 @@ def parse(i, pn):
         print("packet not found")
         return 0
     i = i[j+16:]
-    length = int(i[:8], 2)
-    print(f"found packet #{pn+1} with length {length}:", end =" ")
+    try:
+        length = int(i[:8], 2)
+    except Exception as e:
+        print(f"#1 - {i[:8]}")
+    #print(f"packet #{pn+1}")
+    #print(f"found packet #{pn+1} with length {length}", end ="\n")
     
     i=i[24:]
-    print("0x", end=" ")
+    #print("0x", end=" ")
+    out = []
     for j in range(length):
-        print(("0"+hex(int(i[:8],2))[2:])[-2:], end=" ")
+        try:
+            s = int(i[:8],2)
+            out.append(s)
+        except Exception as e:
+            print("discarded packet")
+            return 0
         i=i[8:]
-    print("")
+    #print(out)
+    split(self, out)
     return 1
    
-class blk(gr.sync_block):  # other base classes are basic_block, decim_block, interp_block
 
-    def __init__(self, output_file_name="/dev/null"):
+    
+   
+class blk(gr.sync_block):
+    def __init__(self):
         np.set_printoptions(threshold=np.inf)
         gr.sync_block.__init__(
             self,
-            name='yeet',   # will show up in GRC
+            name='yeet',
             in_sig=[np.byte, np.byte],
             out_sig=[np.byte]
         )
-        # if an attribute with the same name as a parameter is found,
-        # a callback is registered (properties work, too).
-        self.output_file_name = output_file_name
         self.cleanBuffer = ""
         self.fullBuffer = ""
         self.cumPackets = 0
         self.lastProcessTime = time.time()
         self.preval = 0
         self.cumctr = 0
-        #f = open(self.output_file_name, "w")
-        #f.close()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.testctr = 1
+        self.lastPacketTime = 0
 
     def work(self, input_items, output_items):
 #        print(f"hi with {len(input_items[0])} samples")
         
+        if (testing_check): checkPacketTime(self)
         t1 = (input_items[1][:] == 1)
         t2 = (input_items[0])[t1]
         
@@ -78,22 +156,33 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
         self.fullBuffer += g
         
         if len(self.fullBuffer) > 1000:
-            (shortened, self.cumctr, self.preval) = clean(self.fullBuffer, self.cumctr, self.preval)
+            try:
+                (shortened, self.cumctr, self.preval) = clean(self.fullBuffer, self.cumctr, self.preval)
+            except Exception as e:
+                print("clean error")
+                return len(output_items[0])
             self.fullBuffer = ""
             self.cleanBuffer += shortened
         
         
-        if ((time.time() - self.lastProcessTime > 0.01) and len(self.cleanBuffer) > 600):
+        if ((time.time() - self.lastProcessTime > 0.001) and len(self.cleanBuffer) > 300):
             #print(self.cleanBuffer)
             self.lastProcessTime = time.time()
             #print(f"processing {len(self.cleanBuffer)} bits")
             s = self.cleanBuffer
-            seq = "1010100010110111010100"
+            seq = "1010101010100010110111010100"
             res = [i for i in range(len(s)) if s.startswith(seq, i)]
             if (res):
                 for i in range(len(res)-1):
                     packet = self.cleanBuffer[res[i]:res[i+1]]
-                    self.cumPackets += parse(packet, self.cumPackets)
+                    numparsed = parse(self, packet, self.cumPackets)
+                    #print(f"got {numparsed} packets, buffer has size {len(self.cleanBuffer)}")
+                    if (numparsed == 0):
+                        print(f"parse error - discarded buffer with size {len(self.cleanBuffer)}")
+                        self.cleanBuffer = "0"
+                        return len(output_items[0])
+                    else:
+                        self.cumPackets += numparsed
                 self.cleanBuffer = self.cleanBuffer[res[-1]:]
                 #print(self.cleanBuffer)
         #print(len(output_items[0]))

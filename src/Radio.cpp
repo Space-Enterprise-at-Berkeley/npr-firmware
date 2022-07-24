@@ -48,9 +48,10 @@ namespace Radio {
             radioBuffer[radioBufferSize] = 255;
             radioBufferSize++;
         }
+        digitalWrite(33, LOW);
         bool success = Si446x_TX(radioBuffer, radioBufferSize, 0, SI446X_STATE_RX);
         transmitting = true;
-        //digitalWrite(RADIO_LED, LOW);
+        digitalWrite(33, HIGH); //blue LED pin
         transmitStart = millis();
         DEBUG("Transmitting Radio Packet\n");
         if(!success){
@@ -60,13 +61,28 @@ namespace Radio {
     }
     void transmitRadioBuffer(){ transmitRadioBuffer(false);}
 
+    void transmitTestPattern() {
+        for(int a = 69; a < 71; a++) {
+            radioBuffer[0] = a;
+            for (int i = 0; i < 100; i++) {
+                for (int j = 0; j < 99; j++) {
+                    radioBuffer[j+1] = j+i;
+                }
+                radioBufferSize = 100;
+                transmitRadioBuffer();
+                delay(50);
+            }
+        }
+    }
+
     void forwardPacket(Comms::Packet *packet){
         int packetLen = packet->len + 8;
-        if(radioBufferSize + packetLen > MAX_RADIO_TRX_SIZE - 1){
-            transmitRadioBuffer();
-        }
+        // if(radioBufferSize + packetLen > MAX_RADIO_TRX_SIZE - 1){
+        //     transmitRadioBuffer();
+        // }
         memcpy(radioBuffer + radioBufferSize, (uint8_t *) packet, packetLen);
-        radioBufferSize += packetLen;
+        radioBufferSize = packetLen;
+        transmitRadioBuffer();
     }
 
     void txCalib10(int a[], int ctr) {
