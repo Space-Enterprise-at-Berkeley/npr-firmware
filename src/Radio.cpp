@@ -27,7 +27,7 @@ namespace Radio {
     void initRadio() {
 
         Si446x_init();
-        Si446x_setTxPower(4);
+        Si446x_setTxPower(127); //TODO verify this makes a difference
         Si446x_setupCallback(SI446X_CBS_SENT, 1); 
 
         #ifdef FLIGHT
@@ -41,6 +41,7 @@ namespace Radio {
     }
 
     void transmitRadioBuffer(bool swapFlag){
+        while (transmitting)
         if(radioBufferSize == 0){
             return;
         }
@@ -55,7 +56,7 @@ namespace Radio {
         transmitStart = millis();
         DEBUG("Transmitting Radio Packet\n");
         if(!success){
-            DEBUG("Error Transmitting Radio Packet");
+            DEBUG("Error Transmitting Radio Packet\n");
         }
         radioBufferSize = 0;
     }
@@ -77,12 +78,12 @@ namespace Radio {
 
     void forwardPacket(Comms::Packet *packet){
         int packetLen = packet->len + 8;
-        // if(radioBufferSize + packetLen > MAX_RADIO_TRX_SIZE - 1){
-        //     transmitRadioBuffer();
-        // }
+        if(radioBufferSize + packetLen > MAX_RADIO_TRX_SIZE - 1){
+            transmitRadioBuffer();
+        }
         memcpy(radioBuffer + radioBufferSize, (uint8_t *) packet, packetLen);
-        radioBufferSize = packetLen;
-        transmitRadioBuffer();
+        radioBufferSize += packetLen;
+        //transmitRadioBuffer();
     }
 
     void txCalib10(int a[], int ctr) {

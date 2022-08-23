@@ -8,8 +8,9 @@
 namespace Comms {
 
     std::map<uint8_t, commFunction> callbackMap;
-    uint8_t packetBuffer[sizeof(Packet)];
-    uint8_t packetBufferSize= 0;
+    uint8_t packetBuffer[1000];
+    uint8_t packetBufferCtr = 0;
+    uint32_t goodPackets, failedPackets;
 
     void initComms() {
         Serial.begin(115200);
@@ -51,29 +52,27 @@ namespace Comms {
     }
 
     void processWaitingPackets() {
-        if(Radio::transmitting) return;
-        if(Serial1.available()) {
-            packetBufferSize = 0;
-            while(packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
-                packetBuffer[packetBufferSize-2] == 10 && packetBuffer[packetBufferSize-1] == 10)){
-                // Serial.print(packetBufferSize);
-                // Serial.print(',');
-                // Serial.print(packetBuffer[packetBufferSize-3]);
-                // Serial.print(",");
-                // Serial.print(packetBuffer[packetBufferSize-2]);
-                // Serial.print(",");
-                // Serial.print(packetBuffer[packetBufferSize-1]);
-                // Serial.println();
 
-                int serialByte = Serial1.read();
-                if(serialByte == -1) return;
-                packetBuffer[packetBufferSize] = serialByte;
-                packetBufferSize++;
+        while(Serial1.available()) {
+
+            int serialByte = Serial1.read();
+            if(serialByte == -1) return;
+            packetBuffer[packetBufferCtr] = serialByte;
+            if ((packetBufferCtr > 3) && (packetBuffer[packetBufferCtr-2] == '\r') && (packetBuffer[packetBufferCtr-1] == '\n') && (packetBuffer[packetBufferCtr] == '\n')) {
+                Packet* packet = (Packet*) &packetBuffer; 
+                uint16_t receivedCheck = *(uint16_t *)&packet->checksum;
+                if (computePacketChecksum(packet) != receivedCheck) {
+                    Serial.printf("packet checksum failed: received id %d. received check: %d, expected check: %d, failed %: %.3f\n", 
+                    packet->id, packet->checksum, computePacketChecksum(packet), (double)failedPackets / (double)goodPackets); 
+                    failedPackets++;
+                } else {
+                    // Serial.printf("got good packet! with id %d, len %d\n", packet->id, packet->len);
+                    goodPackets++;
+                    Radio::forwardPacket(packet);
+                }
+                packetBufferCtr = -1;
             }
-            Packet* packet = (Packet*) &packetBuffer; 
-            if(!evokeCallbackFunction(packet)){
-                Radio::forwardPacket(packet);
-            }
+            packetBufferCtr++;
         }
     }
 

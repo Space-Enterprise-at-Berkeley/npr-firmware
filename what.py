@@ -56,16 +56,14 @@ class what(gr.top_block):
         self.soapy_rtlsdr_source_0.set_gain_mode(0, False)
         self.soapy_rtlsdr_source_0.set_frequency(0, 450003000)
         self.soapy_rtlsdr_source_0.set_frequency_correction(0, 0)
-        self.soapy_rtlsdr_source_0.set_gain(0, 'TUNER', 45)
+        self.soapy_rtlsdr_source_0.set_gain(0, 'TUNER', 30)
         self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(1, firdes.low_pass(1.0,samp_rate, 37500, 5000), 0, samp_rate)
         self.epy_block_0 = epy_block_0.blk()
-        self.digital_binary_slicer_fb_1 = digital.binary_slicer_fb()
         self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
         self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_char*1)
-        self.blocks_multiply_const_xx_0 = blocks.multiply_const_ff(1, 1)
-        self.blocks_moving_average_xx_0 = blocks.moving_average_ff(500, 1, 10000, 1)
+        self.blocks_multiply_const_xx_0 = blocks.multiply_const_ff(100, 1)
+        self.blocks_moving_average_xx_0 = blocks.moving_average_ff(10000, 1, 10000, 1)
         self.blocks_complex_to_mag_squared_0 = blocks.complex_to_mag_squared(1)
-        self.blocks_add_const_vxx_0 = blocks.add_const_ff((-5))
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf((3*(samp_rate/(2*math.pi*fsk_deviation_hz))))
 
 
@@ -73,12 +71,10 @@ class what(gr.top_block):
         # Connections
         ##################################################
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_binary_slicer_fb_0, 0))
-        self.connect((self.blocks_add_const_vxx_0, 0), (self.digital_binary_slicer_fb_1, 0))
         self.connect((self.blocks_complex_to_mag_squared_0, 0), (self.blocks_multiply_const_xx_0, 0))
-        self.connect((self.blocks_moving_average_xx_0, 0), (self.blocks_add_const_vxx_0, 0))
+        self.connect((self.blocks_moving_average_xx_0, 0), (self.epy_block_0, 1))
         self.connect((self.blocks_multiply_const_xx_0, 0), (self.blocks_moving_average_xx_0, 0))
         self.connect((self.digital_binary_slicer_fb_0, 0), (self.epy_block_0, 0))
-        self.connect((self.digital_binary_slicer_fb_1, 0), (self.epy_block_0, 1))
         self.connect((self.epy_block_0, 0), (self.blocks_null_sink_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.blocks_complex_to_mag_squared_0, 0))

@@ -2,12 +2,30 @@
 import numpy as np
 from gnuradio import gr
 import time, socket
+from collections import deque
 
 ip = "127.0.0.1"
 destip = "10.0.0.42"
 port = 42069
 
-testing_check = True
+testing_check = False
+
+good_packets, bad_packets = 0, 0
+prevTime = 0
+
+def checkErrorRate(self):
+    if (time.time() - self.prevTime) > 2:
+        tP = (self.good_packets + self.bad_packets)
+        if (tP > 0):
+            erate = self.good_packets / tP
+            print(f"% good in last 2 seconds: {erate*100}")
+        else:
+            print(f"% good in last 2 seconds: --")
+ 
+        self.prevTime = time.time()
+        self.good_packets, self.bad_packets = 0, 0
+
+    
 
 def clean(i, cumctr, preval):
     
@@ -33,31 +51,79 @@ def clean(i, cumctr, preval):
         ctr += 1
         preval = val
     return ("".join(out), cumctr, preval)
+
+
+def computeChecksum(buff):
+    sum1, sum2 = 0, 0
+
+    id = buff[0]
+    length = buff[1]
+    timestamp = buff[2:6]
+    checksum = buff[6:8]
+    data = buff[8:]
+
+    sum1 = sum1 + id
+    sum2 = sum2 + sum1
+    sum1, sum2 = (sum1%256), (sum2%256)
+
+
+    sum1 = sum1 + length
+    sum2 = sum2 + sum1
+    sum1, sum2 = (sum1%256), (sum2%256)
+
+    for i in range(4):
+        sum1 = sum1 + timestamp[i]
+        sum2 = sum2 + sum1
+        sum1, sum2 = (sum1%256), (sum2%256)
     
-def split(self, i):
+    for i in range(length):
+        sum1 = sum1 + data[i]
+        sum2 = sum2 + sum1
+        sum1, sum2 = (sum1%256), (sum2%256)
+
+    return ((sum2 << 8)|sum1)
+
+    
+
+
+
+def split(self, buff):
 
     #*flight* packets are combined into one radio packet (max 128 bytes)
     #so this function splits them into flight packets
-    
-    #print(i)
-    sendover(self, i)
-#    packets = []
-#    while (len(i) > 1):
-#        length = i[1]
-#        end = 8 + length #id, len, time(4), checksum(2)
-#        packets.append(i[:end])
-#        i = i[end:]
-#    for i in packets:
-#        print(i)
-#        sendover(self, i)
+    ctr = 0
+    try:
+        while True:
+            if (len(buff) < 9):
+                return
+            id = buff[0]
+            length = buff[1]
+            timestamp = (buff[2] << 24) + (buff[3] << 16) + (buff[4] << 8) + (buff[5])
+            checksum = (buff[7] << 8) + buff[6]
+
+            #print(f"id: {id}, length: {length}, timestamp: {timestamp}, checksum: {checksum}, expected checkum: {computeChecksum(buff)}")
+            #print(f"buffer length {len(buff)}, expected length {length + 8}")
+            if (computeChecksum(buff) == checksum):
+                ctr += 1
+                #print(f"sending packet #{ctr} with id: {id}, length: {length}")
+                self.good_packets += 1
+                sendover(self, buff)
+            else:
+                # print("CHECKSUM ERROR")
+                self.bad_packets += 1
+            buff = buff[8+length:]
+    except Exception as e:
+        return
+
 
 def testing_add(self, i):
+    #print(i)
     self.lastPacketTime = time.time()
     check = True
     packet_start = i[0]
     if (68 < packet_start < 71):
         f = i[1]
-        for j in range(1, 100):
+        for j in range(1, i+[0]*100):
             if (i[j] != f+j-1):
                 check = False
     else:
@@ -65,16 +131,33 @@ def testing_add(self, i):
     if check : self.testctr+=1
             
 
-def sendover(self, i):
+def sendRssiPacket(self, rssi):
+    buff = []
+    buff.append(56)
+    buff.append(2)
+    buff += [0]*6
+    buff.append(int(rssi) % 256)
+    buff.append(min(255, abs(int(rssi) >> 8)))
+    i = computeChecksum(buff)
+    buff[6] = min(255, abs(int(i % 256)))
+    buff[7] = min(255, abs(int(i >> 8)))
+    print(buff)
+    sendover(self, buff)
+    
+    
+def sendover(self, buff):
     #sends a flight packet to the GS
     
     if testing_check:
-        testing_add(self, i)
+        testing_add(self, buff)
+
+
     
     f = list(destip)
     f = [ord(i) for i in f]
     f = [len(f)] + f
-    f += i
+    f += buff
+    
     self.sock.sendto(bytes(f), (ip, port))
     
 def checkPacketTime(self):
@@ -127,7 +210,7 @@ class blk(gr.sync_block):
         gr.sync_block.__init__(
             self,
             name='yeet',
-            in_sig=[np.byte, np.byte],
+            in_sig=[np.byte, np.float32],
             out_sig=[np.byte]
         )
         self.cleanBuffer = ""
@@ -139,13 +222,34 @@ class blk(gr.sync_block):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.testctr = 1
         self.lastPacketTime = 0
+        self.good_packets, self.bad_packets = 0, 0
+        self.prevTime = 0
+        self.rssiDeque = deque(maxlen = 100000)
+        self.rssi = 0
+        self.prevRssiTime = time.time()
 
     def work(self, input_items, output_items):
 #        print(f"hi with {len(input_items[0])} samples")
-        
+
+        checkErrorRate(self)
+
         if (testing_check): checkPacketTime(self)
-        t1 = (input_items[1][:] == 1)
-        t2 = (input_items[0])[t1]
+        # t1 = (input_items[1][:] == 1)
+        # t2 = (input_items[0])[t1]
+
+        t2 = input_items[0]
+        
+        for i in input_items[1]: #the avg received power (not necessarily signal strength)
+            self.rssiDeque.append(i)
+            
+        fg = sorted(self.rssiDeque)
+        self.rssi = sum(fg[-300:]) / sum(fg[:300])
+        if (time.time() - self.prevRssiTime > 0.25):
+        
+            sendRssiPacket(self, self.rssi)
+            self.prevRssiTime = time.time()
+        
+        
         
         g = str(t2)
         bad = ['[', ']', '\n', ' ', ',']

@@ -41,18 +41,17 @@ void setup()
   Radio::initRadio();
   Serial.println("hi");
   pinMode(33, OUTPUT);
+  Serial.println("HII");
 }
 void loop() {
-  //Comms::processWaitingPackets();
+  Comms::processWaitingPackets();
 
   //Comms::processWaitingPackets();
   //Radio::txCalib10(arr, 0);
   //delay(1000);
   // digitalWrite(33, LOW);
-  Radio::transmitTestPattern();
   // digitalWrite(33, HIGH);
 
-  delay(1000 * 15);
 
   // Radio::txZeros(33); //tx's [0, 1, 2]
   // delayMicroseconds(2000000);  
