@@ -18,7 +18,7 @@ def checkErrorRate(self):
         tP = (self.good_packets + self.bad_packets)
         if (tP > 0):
             erate = self.good_packets / tP
-            print(f"% good in last 2 seconds: {erate*100}")
+            print(f"% good in last 2 seconds: {erate*100}, total good packets: {self.good_packets}")
         else:
             print(f"% good in last 2 seconds: --")
  
@@ -141,7 +141,7 @@ def sendRssiPacket(self, rssi):
     i = computeChecksum(buff)
     buff[6] = min(255, abs(int(i % 256)))
     buff[7] = min(255, abs(int(i >> 8)))
-    print(buff)
+#    print(buff)
     sendover(self, buff)
     
     
@@ -244,9 +244,10 @@ class blk(gr.sync_block):
             
         fg = sorted(self.rssiDeque)
         self.rssi = sum(fg[-300:]) / sum(fg[:300])
+#        print(self.rssi)
         if (time.time() - self.prevRssiTime > 0.25):
         
-            sendRssiPacket(self, self.rssi)
+#            sendRssiPacket(self, self.rssi)
             self.prevRssiTime = time.time()
         
         

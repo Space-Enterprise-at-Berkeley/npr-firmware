@@ -27,7 +27,7 @@ namespace Radio {
     void initRadio() {
 
         Si446x_init();
-        Si446x_setTxPower(127); //TODO verify this makes a difference
+        Si446x_setTxPower(127);
         Si446x_setupCallback(SI446X_CBS_SENT, 1); 
 
         #ifdef FLIGHT
@@ -41,7 +41,6 @@ namespace Radio {
     }
 
     void transmitRadioBuffer(bool swapFlag){
-        while (transmitting)
         if(radioBufferSize == 0){
             return;
         }
@@ -49,32 +48,17 @@ namespace Radio {
             radioBuffer[radioBufferSize] = 255;
             radioBufferSize++;
         }
-        digitalWrite(33, LOW);
         bool success = Si446x_TX(radioBuffer, radioBufferSize, 0, SI446X_STATE_RX);
         transmitting = true;
-        digitalWrite(33, HIGH); //blue LED pin
+        //digitalWrite(RADIO_LED, LOW);
         transmitStart = millis();
-        DEBUG("Transmitting Radio Packet\n");
+        // DEBUG("Transmitting Radio Packet\n");
         if(!success){
-            DEBUG("Error Transmitting Radio Packet\n");
+            DEBUG("Error Transmitting Radio Packet");
         }
         radioBufferSize = 0;
     }
     void transmitRadioBuffer(){ transmitRadioBuffer(false);}
-
-    void transmitTestPattern() {
-        for(int a = 69; a < 71; a++) {
-            radioBuffer[0] = a;
-            for (int i = 0; i < 100; i++) {
-                for (int j = 0; j < 99; j++) {
-                    radioBuffer[j+1] = j+i;
-                }
-                radioBufferSize = 100;
-                transmitRadioBuffer();
-                delay(50);
-            }
-        }
-    }
 
     void forwardPacket(Comms::Packet *packet){
         int packetLen = packet->len + 8;
@@ -83,21 +67,6 @@ namespace Radio {
         }
         memcpy(radioBuffer + radioBufferSize, (uint8_t *) packet, packetLen);
         radioBufferSize += packetLen;
-        //transmitRadioBuffer();
-    }
-
-    void txCalib10(int a[], int ctr) {
-        for (int i = 0; i < MAX_RADIO_TRX_SIZE; i++) {
-            radioBuffer[i] = 0;
-        }
-        
-        radioBufferSize = 10;
-        for (int i = 0; i < 10; i++) {
-            radioBuffer[i] = a[i] + ctr;
-        }
-
-        transmitRadioBuffer();
-
     }
 
     bool processWaitingRadioPacket() {
