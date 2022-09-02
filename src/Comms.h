@@ -15,7 +15,7 @@ namespace Comms {
     const byte mac[] = {
     0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0x00
     };
-    const IPAddress ethDestination1(10, 0, 0, 42);
+    const IPAddress ethDestination1(10, 0, 0, );
     const IPAddress ethDestination2(10, 0, 0, 69);
     #else
     const byte mac[] = {
