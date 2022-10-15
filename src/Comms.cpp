@@ -55,10 +55,12 @@ namespace Comms {
     void processWaitingPackets() {
         if(Radio::transmitting) return;
         if(Serial1.available()) {
+            Serial.println("got sth");
             packetBufferSize = 0;
             while(packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
                 packetBuffer[packetBufferSize-2] == 10 && packetBuffer[packetBufferSize-1] == 10)){
                 int serialByte = Serial1.read();
+                Serial.println(serialByte);
                 if(serialByte == -1) return;
                 packetBuffer[packetBufferSize] = serialByte;
                 packetBufferSize++;

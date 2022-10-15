@@ -52,7 +52,7 @@ namespace Radio {
         transmitting = true;
         //digitalWrite(RADIO_LED, LOW);
         transmitStart = millis();
-        // DEBUG("Transmitting Radio Packet\n");
+        DEBUG("Transmitting Radio Packet\n");
         if(!success){
             DEBUG("Error Transmitting Radio Packet");
         }
@@ -61,6 +61,7 @@ namespace Radio {
     void transmitRadioBuffer(){ transmitRadioBuffer(false);}
 
     void forwardPacket(Comms::Packet *packet){
+        Serial.println("forwarding packet");
         int packetLen = packet->len + 8;
         if(radioBufferSize + packetLen > MAX_RADIO_TRX_SIZE - 1){
             transmitRadioBuffer();

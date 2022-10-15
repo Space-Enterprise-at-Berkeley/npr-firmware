@@ -260,7 +260,7 @@ class blk(gr.sync_block):
         #g is good str.
         self.fullBuffer += g
         
-        if len(self.fullBuffer) > 1000:
+        if len(self.fullBuffer) > 100:
             try:
                 (shortened, self.cumctr, self.preval) = clean(self.fullBuffer, self.cumctr, self.preval)
             except Exception as e:
@@ -270,7 +270,7 @@ class blk(gr.sync_block):
             self.cleanBuffer += shortened
         
         
-        if ((time.time() - self.lastProcessTime > 0.001) and len(self.cleanBuffer) > 300):
+        if ((time.time() - self.lastProcessTime > 0.001) and len(self.cleanBuffer) > 100):
             #print(self.cleanBuffer)
             self.lastProcessTime = time.time()
             #print(f"processing {len(self.cleanBuffer)} bits")
