@@ -49,9 +49,12 @@ class what(gr.top_block):
         stream_args = ''
         tune_args = ['']
         settings = ['']
-
-        self.soapy_rtlsdr_source_0 = soapy.source(dev, "fc32", 1, '',
+        try:
+            self.soapy_rtlsdr_source_0 = soapy.source(dev, "fc32", 1, '',
                                   stream_args, tune_args, settings)
+        except RuntimeError as e:
+            print(f"plug in your sdr! [{str(e)}]")
+            quit()
         self.soapy_rtlsdr_source_0.set_sample_rate(0, samp_rate)
         self.soapy_rtlsdr_source_0.set_gain_mode(0, False)
         self.soapy_rtlsdr_source_0.set_frequency(0, 450003000)
