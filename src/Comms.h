@@ -65,6 +65,7 @@ namespace Comms {
      * @param packet The packet in which the data is stored.
      */
     void emitPacket(Packet *packet, bool genHeader);
+    void emitPacket(Packet *packet);
 
     uint16_t computePacketChecksum(Packet *packet);
 };

@@ -34,17 +34,38 @@ void SI446X_CB_RXINVALID(int16_t rssi)
 	Serial.println(F(")"));
 }
 
+Comms::Packet testPacket = {.id = 5};
+
 
 void setup() 
 {
+  Serial.begin(115200);
+  Serial.println("starting up");
+  
   Comms::initComms();
   Radio::initRadio();
   Serial.println("hi");
-  pinMode(33, OUTPUT);
   Serial.println("HII");
 }
+int delayS;
 void loop() {
+
+  #ifdef TEST
+    if ((millis() % 10000) > 5000) {
+      delayS = 10;
+    } else {
+      delayS = 0;
+    }
+    testPacket.len = 0;
+    Comms::packetAddFloat(&testPacket, millis() % 1000);
+    Comms::packetAddFloat(&testPacket, millis() % 1000);
+    Comms::packetAddFloat(&testPacket, millis() % 1000);
+    Comms::emitPacket(&testPacket);
+    delay(delayS);
+  #endif
+  #ifdef FLIGHT
   Comms::processWaitingPackets();
+  #endif
 
   //Comms::processWaitingPackets();
   //Radio::txCalib10(arr, 0);

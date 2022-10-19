@@ -15,7 +15,7 @@ namespace Comms {
 
     void initComms() {
         Serial.begin(115200);
-        Serial1.begin(115200);
+        Serial1.begin(250000);
         Serial.setTimeout(1);
     }
 
@@ -55,16 +55,15 @@ namespace Comms {
     void processWaitingPackets() {
         if(Radio::transmitting) return;
         if(Serial1.available()) {
-            Serial.println("got sth");
             packetBufferSize = 0;
             while(packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
                 packetBuffer[packetBufferSize-2] == 10 && packetBuffer[packetBufferSize-1] == 10)){
                 int serialByte = Serial1.read();
-                Serial.println(serialByte);
                 if(serialByte == -1) return;
                 packetBuffer[packetBufferSize] = serialByte;
                 packetBufferSize++;
             }
+            Serial.println("received packet");
             Packet* packet = (Packet*) &packetBuffer; 
             if(!evokeCallbackFunction(packet)){
                 uint16_t checksum = * ((uint16_t *) packet->checksum);
@@ -152,6 +151,8 @@ namespace Comms {
         // Serial.print(packet->data, packet->len);
         // Serial.print('\n');
         #endif
+
+        Radio::forwardPacket(packet);
 
         //Send over ethernet to both ground stations
         // Udp.beginPacket(ethDestination1, port);
