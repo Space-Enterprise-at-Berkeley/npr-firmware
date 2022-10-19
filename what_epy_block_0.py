@@ -213,6 +213,7 @@ class blk(gr.sync_block):
             in_sig=[np.byte, np.float32],
             out_sig=[np.byte]
         )
+        self.set_min_output_buffer(8192)
         self.cleanBuffer = ""
         self.fullBuffer = ""
         self.cumPackets = 0
@@ -233,22 +234,22 @@ class blk(gr.sync_block):
 
         checkErrorRate(self)
 
-        if (testing_check): checkPacketTime(self)
-        # t1 = (input_items[1][:] == 1)
-        # t2 = (input_items[0])[t1]
+        # if (testing_check): checkPacketTime(self)
+        # # t1 = (input_items[1][:] == 1)
+        # # t2 = (input_items[0])[t1]
 
         t2 = input_items[0]
         
-        for i in input_items[1]: #the avg received power (not necessarily signal strength)
-            self.rssiDeque.append(i)
+        # for i in input_items[1]: #the avg received power (not necessarily signal strength)
+        #     self.rssiDeque.append(i)
             
-        fg = sorted(self.rssiDeque)
-        self.rssi = sum(fg[-300:]) / sum(fg[:300])
+        # fg = sorted(self.rssiDeque)
+        # self.rssi = sum(fg[-300:]) / sum(fg[:300])
 #        print(self.rssi)
-        if (time.time() - self.prevRssiTime > 0.25):
+#         if (time.time() - self.prevRssiTime > 0.25):
         
-#            sendRssiPacket(self, self.rssi)
-            self.prevRssiTime = time.time()
+# #            sendRssiPacket(self, self.rssi)
+#             self.prevRssiTime = time.time()
         
         
         
@@ -270,7 +271,7 @@ class blk(gr.sync_block):
             self.cleanBuffer += shortened
         
         
-        if ((time.time() - self.lastProcessTime > 0.001) and len(self.cleanBuffer) > 100):
+        if ((time.time() - self.lastProcessTime > 0.1) or len(self.cleanBuffer) > 100):
             #print(self.cleanBuffer)
             self.lastProcessTime = time.time()
             #print(f"processing {len(self.cleanBuffer)} bits")
@@ -297,6 +298,6 @@ class blk(gr.sync_block):
         
         #output_items[0][:] = input_items[0] * self.example_param
         #return len(output_items[0])
-
+        
         return len(output_items[0])
 
