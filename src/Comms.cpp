@@ -4,10 +4,13 @@
 #include <Comms.h>
 
 #include <Radio.h>
+#include <BlackBox.h>
 
 namespace Comms {
 
     std::map<uint8_t, commFunction> callbackMap;
+    std::vector<commFunction> emitterList;
+
     uint8_t packetBuffer[sizeof(Packet)];
     uint8_t packetBufferSize= 0;
     uint32_t timectr = 0;
@@ -21,6 +24,11 @@ namespace Comms {
 
     void registerCallback(uint8_t id, commFunction function) {
         callbackMap.insert(std::pair<int, commFunction>(id, function));
+    }
+
+
+    void registerEmitter(commFunction function) {
+        emitterList.push_back(function);
     }
 
     /**
@@ -79,7 +87,8 @@ namespace Comms {
                     }
                     Radio::forwardPacket(packet);
 
-
+                    // write packet to bb
+                    BlackBox::writeToBuffer(packet);
                 }
             }
         }
@@ -91,6 +100,14 @@ namespace Comms {
         packet->data[packet->len + 1] = rawData >> 8 & 0xFF;
         packet->data[packet->len + 2] = rawData >> 16 & 0xFF;
         packet->data[packet->len + 3] = rawData >> 24 & 0xFF;
+        packet->len += 4;
+    }
+
+    void packetAddUint32(Packet *packet, uint32_t value) {
+        packet->data[packet->len] = value & 0xFF;
+        packet->data[packet->len + 1] = value >> 8 & 0xFF;
+        packet->data[packet->len + 2] = value >> 16 & 0xFF;
+        packet->data[packet->len + 3] = value >> 24 & 0xFF;
         packet->len += 4;
     }
 

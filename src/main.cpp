@@ -3,6 +3,9 @@
 #include <Comms.h>
 #include <Radio.h>
 #include <Si446x.h>
+
+#include <BlackBox.h>
+
 int arr[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
 int ctr = 0;
 void SI446X_CB_SENT(void)
@@ -44,9 +47,12 @@ void setup()
   
   Comms::initComms();
   Radio::initRadio();
+  BlackBox::init(10);
+  
   Serial.println("hi");
   Serial.println("HII");
 }
+
 int delayS;
 void loop() {
 
