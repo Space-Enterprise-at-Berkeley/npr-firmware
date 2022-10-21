@@ -12,6 +12,7 @@ testing_check = False
 
 good_packets, bad_packets = 0, 0
 prevTime = 0
+packetDict = {}
 
 def checkErrorRate(self):
     if (time.time() - self.prevTime) > 2:
@@ -107,7 +108,14 @@ def split(self, buff):
                 ctr += 1
                 #print(f"sending packet #{ctr} with id: {id}, length: {length}")
                 self.good_packets += 1
-                sendover(self, buff)
+                try:
+                    if (packetDict[id] != timestamp):
+                        sendover(self, buff)
+                        packetDict[id] = timestamp
+                except KeyError:
+                    packetDict[id] = timestamp
+                
+
             else:
                 # print("CHECKSUM ERROR")
                 self.bad_packets += 1
