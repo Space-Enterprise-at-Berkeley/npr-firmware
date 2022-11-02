@@ -47,7 +47,7 @@ void setup()
   
   Comms::initComms();
   Radio::initRadio();
-  BlackBox::init(10);
+  BlackBox::init();
   
   Serial.println("hi");
   Serial.println("HII");

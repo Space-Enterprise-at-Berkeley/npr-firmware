@@ -1,17 +1,12 @@
 #pragma once
 
-// #include <W25Q.h>
-#include <Common.h>
-#include <Comms.h>
 #include <SPIFlash.h>
+#include "Comms.h"
 
 namespace BlackBox {
 
-        void init(int FLASH_SS);
-        void writeToBuffer(Comms::Packet *packet);  
-        void clearBuffer();   
-        void writeBufferToBB(int len, int packetid);
-        int sendMetadataPacket();
-        void resetAll();
-        void dump(int maxDumpPages);
+    void init();
+    void writePacket(Comms::Packet packet);
+    Comms::Packet getData(uint32_t byteAddress);
+    void erase();
 }

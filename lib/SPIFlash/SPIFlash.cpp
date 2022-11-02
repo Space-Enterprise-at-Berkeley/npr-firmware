@@ -100,7 +100,7 @@ boolean SPIFlash::initialize()
   _SPSR = SPSR;
 #endif
   pinMode(_slaveSelectPin, OUTPUT);
-  SPI.begin(26, 33, 32);
+  SPI.begin(3, 4, 2);
 #ifdef SPI_HAS_TRANSACTION
   _settings = SPISettings(4000000, MSBFIRST, SPI_MODE0);
 #endif

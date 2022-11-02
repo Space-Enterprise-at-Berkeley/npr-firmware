@@ -86,9 +86,6 @@ namespace Comms {
                         goodPackets = 0;
                     }
                     Radio::forwardPacket(packet);
-
-                    // write packet to bb
-                    BlackBox::writeToBuffer(packet);
                 }
             }
         }
@@ -157,6 +154,10 @@ namespace Comms {
             uint16_t checksum = computePacketChecksum(packet);
             packet->checksum[0] = checksum & 0xFF;
             packet->checksum[1] = checksum >> 8;
+        }
+
+        for (commFunction func : emitterList) {
+            func(*packet);
         }
 
         // Send over serial, but disable if in debug mode
