@@ -6,6 +6,8 @@ namespace BlackBox {
     SPIFlash flash(1, expectedDeviceID);
     uint32_t addr;
 
+    bool enable = false;
+
     void init() {
         pinMode(1, OUTPUT);
         if (flash.initialize()) {
@@ -16,12 +18,24 @@ namespace BlackBox {
             Serial.print(") mismatched the read value: 0x");
             Serial.println(flash.readDeviceId(), HEX);
         }
+
+        Comms::registerCallback(200, packetHandler);
+    }
+
+    void packetHandler(Comms::Packet packet) {
+        uint8_t data = packet.data[0];
+        enable = data;
+        if (!data) {
+            erase();
+        }
     }
 
     void writePacket(Comms::Packet packet) {
-        uint16_t len = 8 + packet.len;
-        flash.writeBytes(addr, &packet, len);
-        addr += len;
+        if (enable) {
+            uint16_t len = 8 + packet.len;
+            flash.writeBytes(addr, &packet, len);
+            addr += len;
+        }
     }
 
     Comms::Packet getData(uint32_t byteAddress) {
@@ -33,5 +47,11 @@ namespace BlackBox {
     void erase() {
         Serial.println("starting chip erase");
         flash.chipErase();
+    }
+
+    void getAllData() {
+        for(int i = 0; i < addr; i++) {
+            Serial.write(flash.readByte(addr));
+        }
     }
 }
