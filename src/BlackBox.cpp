@@ -31,7 +31,7 @@ namespace BlackBox {
     }
 
     void writePacket(Comms::Packet packet) {
-        if (enable) {
+        if (enable && addr < FLASH_SIZE) {
             uint16_t len = 8 + packet.len;
             flash.writeBytes(addr, &packet, len);
             addr += len;

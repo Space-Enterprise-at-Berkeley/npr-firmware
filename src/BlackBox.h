@@ -5,6 +5,8 @@
 
 namespace BlackBox {
 
+    const uint32_t FLASH_SIZE = 1.6e7;
+
     void init();
     void writePacket(Comms::Packet packet);
     Comms::Packet getData(uint32_t byteAddress);
