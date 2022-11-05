@@ -39,6 +39,7 @@ void SI446X_CB_RXINVALID(int16_t rssi)
 
 Comms::Packet testPacket = {.id = 5};
 
+Comms::Packet sizePacket = {.id = 153};
 
 void setup() 
 {
@@ -54,6 +55,10 @@ void setup()
 }
 
 int delayS;
+
+long sizePacketPeriod = 1e3;
+long lastTime = micros();
+
 void loop() {
 
   #ifdef TEST
@@ -71,6 +76,13 @@ void loop() {
   #endif
   #ifdef FLIGHT
   Comms::processWaitingPackets();
+
+  // send blackbox size used
+  if (micros() - lastTime > sizePacketPeriod) {
+    sizePacket.len = 0;
+    Comms::packetAddUint32(&sizePacket, BlackBox::getAddr());
+    Comms::emitPacket(&sizePacket);
+  }
   #endif
 
   //Comms::processWaitingPackets();

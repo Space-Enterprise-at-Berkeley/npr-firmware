@@ -11,4 +11,6 @@ namespace BlackBox {
     void erase();
 
     void packetHandler(Comms::Packet packet);
+
+    uint32_t getAddr();
 }

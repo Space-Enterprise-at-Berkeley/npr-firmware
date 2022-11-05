@@ -54,4 +54,8 @@ namespace BlackBox {
             Serial.write(flash.readByte(addr));
         }
     }
+
+    uint32_t getAddr() {
+        return addr;
+    }
 }
