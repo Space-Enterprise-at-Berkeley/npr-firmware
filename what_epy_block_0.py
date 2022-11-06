@@ -260,7 +260,7 @@ class blk(gr.sync_block):
 #             self.prevRssiTime = time.time()
         
         
-        
+        # print(t2[:100])
         g = str(t2)
         bad = ['[', ']', '\n', ' ', ',']
         for i in bad:
@@ -282,7 +282,7 @@ class blk(gr.sync_block):
         if ((time.time() - self.lastProcessTime > 0.1) or len(self.cleanBuffer) > 100):
             #print(self.cleanBuffer)
             self.lastProcessTime = time.time()
-            #print(f"processing {len(self.cleanBuffer)} bits")
+            # print(f"processing {len(self.cleanBuffer)} bits")
             s = self.cleanBuffer
             seq = "1010101010100010110111010100"
             res = [i for i in range(len(s)) if s.startswith(seq, i)]
