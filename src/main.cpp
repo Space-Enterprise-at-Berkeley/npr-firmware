@@ -3,6 +3,9 @@
 #include <Comms.h>
 #include <Radio.h>
 #include <Si446x.h>
+
+#include <BlackBox.h>
+
 int arr[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
 int ctr = 0;
 void SI446X_CB_SENT(void)
@@ -36,6 +39,7 @@ void SI446X_CB_RXINVALID(int16_t rssi)
 
 Comms::Packet testPacket = {.id = 5};
 
+Comms::Packet sizePacket = {.id = 153};
 
 void setup() 
 {
@@ -44,10 +48,17 @@ void setup()
   
   Comms::initComms();
   Radio::initRadio();
+  BlackBox::init();
+  
   Serial.println("hi");
   Serial.println("HII");
 }
+
 int delayS;
+
+long sizePacketPeriod = 1e6;
+long lastTime = micros();
+
 void loop() {
 
   #ifdef TEST
@@ -65,6 +76,14 @@ void loop() {
   #endif
   #ifdef FLIGHT
   Comms::processWaitingPackets();
+
+  // send blackbox size used
+  if (micros() - lastTime > sizePacketPeriod) {
+    sizePacket.len = 0;
+    Comms::packetAddUint32(&sizePacket, BlackBox::getAddr());
+    Comms::emitPacket(&sizePacket);
+    lastTime = micros();
+  }
   #endif
 
   //Comms::processWaitingPackets();

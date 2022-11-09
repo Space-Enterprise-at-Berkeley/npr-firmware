@@ -4,23 +4,32 @@
 #include <Comms.h>
 
 #include <Radio.h>
+#include <BlackBox.h>
+unsigned long baud_rate = 250000;
 
 namespace Comms {
 
     std::map<uint8_t, commFunction> callbackMap;
+    std::vector<commFunction> emitterList;
+
     uint8_t packetBuffer[sizeof(Packet)];
-    uint8_t packetBufferSize= 0;
+    uint32_t packetBufferSize= 0;
     uint32_t timectr = 0;
     uint32_t goodPackets = 0;
 
     void initComms() {
         Serial.begin(115200);
-        Serial1.begin(250000);
+        Serial1.begin(baud_rate);
         Serial.setTimeout(1);
     }
 
     void registerCallback(uint8_t id, commFunction function) {
         callbackMap.insert(std::pair<int, commFunction>(id, function));
+    }
+
+
+    void registerEmitter(commFunction function) {
+        emitterList.push_back(function);
     }
 
     /**
@@ -55,15 +64,15 @@ namespace Comms {
     void processWaitingPackets() {
         if(Radio::transmitting) return;
         if(Serial1.available()) {
-            packetBufferSize = 0;
-            while(packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
+            while (packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
                 packetBuffer[packetBufferSize-2] == 10 && packetBuffer[packetBufferSize-1] == 10)){
                 int serialByte = Serial1.read();
                 if(serialByte == -1) return;
                 packetBuffer[packetBufferSize] = serialByte;
                 packetBufferSize++;
+                return;
             }
-            Serial.println("received packet");
+            // Serial.println("received packet");
             Packet* packet = (Packet*) &packetBuffer; 
             if(!evokeCallbackFunction(packet)){
                 uint16_t checksum = * ((uint16_t *) packet->checksum);
@@ -72,16 +81,15 @@ namespace Comms {
                 } else { 
                     goodPackets++;
 
-                    if (millis() - timectr > 1000) {
-                        Serial.printf("last second: %d packets\n", goodPackets);
+                    if (millis() - timectr > 2000) {
+                        Serial.printf("last 2 seconds: %d packets\n", goodPackets);
                         timectr = millis();
                         goodPackets = 0;
                     }
                     Radio::forwardPacket(packet);
-
-
                 }
             }
+            packetBufferSize = 0;
         }
     }
 
@@ -91,6 +99,14 @@ namespace Comms {
         packet->data[packet->len + 1] = rawData >> 8 & 0xFF;
         packet->data[packet->len + 2] = rawData >> 16 & 0xFF;
         packet->data[packet->len + 3] = rawData >> 24 & 0xFF;
+        packet->len += 4;
+    }
+
+    void packetAddUint32(Packet *packet, uint32_t value) {
+        packet->data[packet->len] = value & 0xFF;
+        packet->data[packet->len + 1] = value >> 8 & 0xFF;
+        packet->data[packet->len + 2] = value >> 16 & 0xFF;
+        packet->data[packet->len + 3] = value >> 24 & 0xFF;
         packet->len += 4;
     }
 
@@ -140,6 +156,10 @@ namespace Comms {
             uint16_t checksum = computePacketChecksum(packet);
             packet->checksum[0] = checksum & 0xFF;
             packet->checksum[1] = checksum >> 8;
+        }
+
+        for (commFunction func : emitterList) {
+            func(*packet);
         }
 
         // Send over serial, but disable if in debug mode

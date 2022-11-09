@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <map>
+#include <vector>
 
 namespace Comms {
 
@@ -44,10 +45,13 @@ namespace Comms {
      */
     void registerCallback(uint8_t id, commFunction function);
 
+    void registerEmitter(commFunction function);
+
     void processWaitingPackets();
 
     void packetAddFloat(Packet *packet, float value);
     void packetAddUint8(Packet *packet, uint8_t value);
+    void packetAddUint32(Packet *packet, uint32_t value);
 
     /**
      * @brief Interprets the packet data as a float.
