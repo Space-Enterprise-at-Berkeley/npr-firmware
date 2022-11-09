@@ -5,6 +5,7 @@
 
 #include <Radio.h>
 #include <BlackBox.h>
+unsigned long baud_rate = 250000;
 
 namespace Comms {
 
@@ -12,13 +13,13 @@ namespace Comms {
     std::vector<commFunction> emitterList;
 
     uint8_t packetBuffer[sizeof(Packet)];
-    uint8_t packetBufferSize= 0;
+    uint32_t packetBufferSize= 0;
     uint32_t timectr = 0;
     uint32_t goodPackets = 0;
 
     void initComms() {
         Serial.begin(115200);
-        Serial1.begin(250000);
+        Serial1.begin(baud_rate);
         Serial.setTimeout(1);
     }
 
@@ -63,15 +64,15 @@ namespace Comms {
     void processWaitingPackets() {
         if(Radio::transmitting) return;
         if(Serial1.available()) {
-            packetBufferSize = 0;
-            while(packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
+            while (packetBufferSize < 3 || !(packetBuffer[packetBufferSize-3] == 13 &&
                 packetBuffer[packetBufferSize-2] == 10 && packetBuffer[packetBufferSize-1] == 10)){
                 int serialByte = Serial1.read();
                 if(serialByte == -1) return;
                 packetBuffer[packetBufferSize] = serialByte;
                 packetBufferSize++;
+                return;
             }
-            Serial.println("received packet");
+            // Serial.println("received packet");
             Packet* packet = (Packet*) &packetBuffer; 
             if(!evokeCallbackFunction(packet)){
                 uint16_t checksum = * ((uint16_t *) packet->checksum);
@@ -80,14 +81,15 @@ namespace Comms {
                 } else { 
                     goodPackets++;
 
-                    if (millis() - timectr > 1000) {
-                        Serial.printf("last second: %d packets\n", goodPackets);
+                    if (millis() - timectr > 2000) {
+                        Serial.printf("last 2 seconds: %d packets\n", goodPackets);
                         timectr = millis();
                         goodPackets = 0;
                     }
                     Radio::forwardPacket(packet);
                 }
             }
+            packetBufferSize = 0;
         }
     }
 

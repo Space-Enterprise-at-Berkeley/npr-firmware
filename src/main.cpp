@@ -56,7 +56,7 @@ void setup()
 
 int delayS;
 
-long sizePacketPeriod = 1e3;
+long sizePacketPeriod = 1e6;
 long lastTime = micros();
 
 void loop() {
@@ -82,6 +82,7 @@ void loop() {
     sizePacket.len = 0;
     Comms::packetAddUint32(&sizePacket, BlackBox::getAddr());
     Comms::emitPacket(&sizePacket);
+    lastTime = micros();
   }
   #endif
 
