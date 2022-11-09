@@ -60,41 +60,16 @@ long sizePacketPeriod = 1e6;
 long lastTime = micros();
 
 void loop() {
-
-  #ifdef TEST
-    if ((millis() % 10000) > 5000) {
-      delayS = 10;
-    } else {
-      delayS = 0;
-    }
-    testPacket.len = 0;
-    Comms::packetAddFloat(&testPacket, millis() % 1000);
-    Comms::packetAddFloat(&testPacket, millis() % 1000);
-    Comms::packetAddFloat(&testPacket, millis() % 1000);
-    Comms::emitPacket(&testPacket);
-    delay(delayS);
-  #endif
+  
   #ifdef FLIGHT
   Comms::processWaitingPackets();
-
   // send blackbox size used
   if (micros() - lastTime > sizePacketPeriod) {
     sizePacket.len = 0;
-    Comms::packetAddUint32(&sizePacket, BlackBox::getAddr());
+    Comms::packetAddUint32(&sizePacket, (BlackBox::getAddr() / 1000) + (BlackBox::erasing ? 1 : 0));
     Comms::emitPacket(&sizePacket);
     lastTime = micros();
   }
   #endif
 
-  //Comms::processWaitingPackets();
-  //Radio::txCalib10(arr, 0);
-  //delay(1000);
-  // digitalWrite(33, LOW);
-  // digitalWrite(33, HIGH);
-
-
-  // Radio::txZeros(33); //tx's [0, 1, 2]
-  // delayMicroseconds(2000000);  
-  // Radio::txZeros(33); //tx's [0, 1, 2]
-  // delayMicroseconds(5000000);
 }

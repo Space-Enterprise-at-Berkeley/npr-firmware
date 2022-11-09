@@ -6,11 +6,13 @@
 namespace BlackBox {
 
     const uint32_t FLASH_SIZE = 1.6e7;
+    extern bool erasing;
 
     void init();
     void writePacket(Comms::Packet packet);
     Comms::Packet getData(uint32_t byteAddress);
-    void erase();
+    void startEraseAndRecord();
+    
 
     void packetHandler(Comms::Packet packet);
 

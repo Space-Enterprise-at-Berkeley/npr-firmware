@@ -5,6 +5,7 @@ namespace BlackBox {
     uint16_t expectedDeviceID=0xEF40;
     SPIFlash flash(1, expectedDeviceID);
     uint32_t addr;
+    bool erasing = false;
 
     bool enable = false;
 
@@ -23,15 +24,15 @@ namespace BlackBox {
     }
 
     void packetHandler(Comms::Packet packet) {
-        uint8_t data = packet.data[0];
-        enable = data;
-        if (!data) {
-            erase();
-        }
+        startEraseAndRecord();
     }
 
     void writePacket(Comms::Packet packet) {
-        if (enable && addr < FLASH_SIZE) {
+        if (erasing && flash.busy()) {
+            return;
+        }
+        // Serial.printf("busy: %d, erasing: %d, addr: %d, enable: %d, writing\n", flash.busy(), erasing, addr, enable);
+        if (enable && addr < (FLASH_SIZE * 0.99)) {
             uint16_t len = 8 + packet.len;
             flash.writeBytes(addr, &packet, len);
             addr += len;
@@ -44,9 +45,12 @@ namespace BlackBox {
         return packet;
     }
 
-    void erase() {
+    void startEraseAndRecord() {
         Serial.println("starting chip erase");
         flash.chipErase();
+        erasing = true;
+        enable = true;
+        addr = 0;
     }
 
     void getAllData() {

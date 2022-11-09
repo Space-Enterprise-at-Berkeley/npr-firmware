@@ -86,7 +86,11 @@ namespace Comms {
                         timectr = millis();
                         goodPackets = 0;
                     }
+                    if (packet->id == 200) {
+                        Serial.println("bruh");
+                    }
                     Radio::forwardPacket(packet);
+                    BlackBox::writePacket(*packet);
                 }
             }
             packetBufferSize = 0;
