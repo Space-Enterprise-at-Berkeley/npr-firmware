@@ -3,6 +3,7 @@
 #include <Comms.h>
 #include <Radio.h>
 #include <Si446x.h>
+#include "ReplayFlight.h"
 
 #include <BlackBox.h>
 
@@ -52,6 +53,14 @@ void setup()
   
   Serial.println("hi");
   Serial.println("HII");
+  #ifdef FLIGHT
+  Serial.println("starting in flight mode");
+  #endif
+  #ifdef REPLAY
+  Serial.println("replaying flight...");
+  delay(1000);
+  #endif
+
 }
 
 int delayS;
@@ -68,8 +77,14 @@ void loop() {
     sizePacket.len = 0;
     Comms::packetAddUint32(&sizePacket, (BlackBox::getAddr() / 1000) + (BlackBox::erasing ? 1 : 0));
     Comms::emitPacket(&sizePacket);
+    BlackBox::writePacket(sizePacket);
     lastTime = micros();
   }
+  #endif
+
+  #ifdef REPLAY
+  ReplayFlight::startReplay();
+  while(1) {}
   #endif
 
 }

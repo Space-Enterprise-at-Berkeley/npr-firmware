@@ -39,10 +39,10 @@ namespace BlackBox {
         }
     }
 
-    Comms::Packet getData(uint32_t byteAddress) {
-        Comms::Packet packet;
-        flash.readBytes(byteAddress, &packet, sizeof(Comms::Packet));
-        return packet;
+    bool getData(uint32_t byteAddress, Comms::Packet* packet) {
+        // Comms::Packet packet;
+        flash.readBytes(byteAddress, packet, sizeof(Comms::Packet));
+        return Comms::verifyPacket(packet);
     }
 
     void startEraseAndRecord() {

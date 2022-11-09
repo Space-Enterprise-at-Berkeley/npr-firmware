@@ -63,6 +63,7 @@ namespace Comms {
     float packetGetFloat(Packet *packet, uint8_t index);
     uint32_t packetGetUint32(Packet *packet, uint8_t index);
 
+    bool verifyPacket(Packet *packet);
     /**
      * @brief Sends packet data over ethernet and serial.
      * 

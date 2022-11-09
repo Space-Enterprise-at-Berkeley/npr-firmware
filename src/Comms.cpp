@@ -119,6 +119,11 @@ namespace Comms {
         packet->len++;
     }
 
+    bool verifyPacket(Packet *packet) {
+        uint16_t csum = computePacketChecksum(packet);
+        return ((uint8_t) csum & 0xFF) == packet->checksum[0] && ((uint8_t) (csum >> 8)) == packet->checksum[1];
+    }
+
     float packetGetFloat(Packet *packet, uint8_t index) {
         uint32_t rawData = packet->data[index+3];
         rawData <<= 8;

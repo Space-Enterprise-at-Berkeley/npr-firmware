@@ -10,7 +10,7 @@ namespace BlackBox {
 
     void init();
     void writePacket(Comms::Packet packet);
-    Comms::Packet getData(uint32_t byteAddress);
+    bool getData(uint32_t byteAddress, Comms::Packet* packet);
     void startEraseAndRecord();
     
 
