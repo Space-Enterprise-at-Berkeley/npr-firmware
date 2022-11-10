@@ -35,7 +35,7 @@ class what(gr.top_block):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 1000000
+        self.samp_rate = samp_rate = 300000
         self.update_rate = update_rate = 0.00001
         self.num_pts = num_pts = int(samp_rate * 0.2)
         self.fsk_deviation_hz = fsk_deviation_hz = 20000
