@@ -18,13 +18,20 @@ namespace ReplayFlight {
             if (del > 1000) {
                 del = 10;
             }
-            if (del != 0) {
-                del -= 2;
+            int delayy = 5;
+            if (del > (delayy-1)) {
+                del -= delayy;
+            } else {
             }
-            delay(del);
+            if (packet1.id == 153) {
+                del = 0;
+            } else {
+                lastPacketTime = thisPacketTime;
+            }
             Serial.printf("packet good, id %d, delaying %d\n", packet1.id, del);
+
+            delay(del);
             addr += 8 + packet1.len;
-            lastPacketTime = thisPacketTime;
             Comms::emitPacket(&packet1);
         }
     }
