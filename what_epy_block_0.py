@@ -46,7 +46,7 @@ def clean(i, cumctr, preval):
         if val == '': continue
         if (val != preval):
             #print(cumctr/25)
-            out += [preval]*int(round(cumctr/(25 * (0.3))))
+            out += [preval]*int(round(cumctr/(25 * (0.5))))
             cumctr = 0
         cumctr += 1
         ctr += 1

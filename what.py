@@ -36,7 +36,7 @@ class what(gr.top_block):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = 300000
+        self.samp_rate = samp_rate = 1000000
         self.update_rate = update_rate = 0.00001
         self.num_pts = num_pts = int(samp_rate * 0.2)
         self.fsk_deviation_hz = fsk_deviation_hz = 20000
@@ -64,12 +64,13 @@ class what(gr.top_block):
         self.soapy_rtlsdr_source_0.set_frequency(0, 450003000)
         self.soapy_rtlsdr_source_0.set_frequency_correction(0, 0)
         self.soapy_rtlsdr_source_0.set_gain(0, 'TUNER', 30)
-        self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(1, firdes.low_pass(1.0,samp_rate, 37500, 5000), 0, samp_rate)
+        self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(1, firdes.low_pass(1.0,samp_rate/2, 37500, 5000), 0, samp_rate/2)
         self.epy_block_0 = epy_block_0.blk()
         self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
         self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_char*1)
         self.blocks_multiply_const_xx_0 = blocks.multiply_const_ff(100, 1)
         self.blocks_moving_average_xx_0 = blocks.moving_average_ff(10000, 1, 10000, 1)
+        self.freq_xlating_fir_filter_xxx_1 = filter.freq_xlating_fir_filter_ccc(2, firdes.low_pass(1.0,samp_rate, 300000, 100000), 0, samp_rate)
 
         global recordingToFile
         if recordingToFile:
@@ -95,7 +96,8 @@ class what(gr.top_block):
         if recordingToFile:
             self.connect((self.soapy_rtlsdr_source_0, 0), (self.blocks_file_sink_0, 0))
 
-        self.connect((self.soapy_rtlsdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
+        self.connect((self.soapy_rtlsdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_1, 0))
+        self.connect((self.freq_xlating_fir_filter_xxx_1, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
 
 
     def get_samp_rate(self):
