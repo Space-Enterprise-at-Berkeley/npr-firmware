@@ -6,7 +6,7 @@
 #
 # GNU Radio Python Flow Graph
 # Title: Not titled yet
-# GNU Radio version: 3.10.3.0
+# GNU Radio version: 3.10.4.0
 
 from gnuradio import analog
 import math
@@ -25,6 +25,7 @@ from gnuradio import soapy
 import what_epy_block_0 as epy_block_0  # embedded python block
 
 
+recordingToFile = 0
 
 
 class what(gr.top_block):
@@ -40,6 +41,9 @@ class what(gr.top_block):
         self.num_pts = num_pts = int(samp_rate * 0.2)
         self.fsk_deviation_hz = fsk_deviation_hz = 20000
         self.fname = fname = "firstrealpls"
+        self.file_name = file_name = "temp_write"
+        import time
+        file_name = "recordings/"+str(time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime()))
 
         ##################################################
         # Blocks
@@ -49,9 +53,9 @@ class what(gr.top_block):
         stream_args = ''
         tune_args = ['']
         settings = ['']
+
         try:
-            self.soapy_rtlsdr_source_0 = soapy.source(dev, "fc32", 1, '',
-                                  stream_args, tune_args, settings)
+            self.soapy_rtlsdr_source_0 = soapy.source(dev, "fc32", 1, '', stream_args, tune_args, settings)
         except RuntimeError as e:
             print(f"plug in your sdr! [{str(e)}]")
             quit()
@@ -66,6 +70,12 @@ class what(gr.top_block):
         self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_char*1)
         self.blocks_multiply_const_xx_0 = blocks.multiply_const_ff(100, 1)
         self.blocks_moving_average_xx_0 = blocks.moving_average_ff(10000, 1, 10000, 1)
+
+        global recordingToFile
+        if recordingToFile:
+            self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, file_name, False)
+            self.blocks_file_sink_0.set_unbuffered(False)
+
         self.blocks_complex_to_mag_squared_0 = blocks.complex_to_mag_squared(1)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf((3*(samp_rate/(2*math.pi*fsk_deviation_hz))))
 
@@ -81,6 +91,10 @@ class what(gr.top_block):
         self.connect((self.epy_block_0, 0), (self.blocks_null_sink_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.blocks_complex_to_mag_squared_0, 0))
+
+        if recordingToFile:
+            self.connect((self.soapy_rtlsdr_source_0, 0), (self.blocks_file_sink_0, 0))
+
         self.connect((self.soapy_rtlsdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
 
 
@@ -119,10 +133,20 @@ class what(gr.top_block):
     def set_fname(self, fname):
         self.fname = fname
 
+    def get_file_name(self):
+        return self.file_name
+
+    def set_file_name(self, file_name):
+        self.file_name = file_name
+        self.blocks_file_sink_0.open(self.file_name)
+
 
 
 
 def main(top_block_cls=what, options=None):
+    global recordingToFile
+    recordingToFile = sys.argv[min(len(sys.argv)-1, 1)] == "--record"
+    print(recordingToFile)
     tb = top_block_cls()
 
     def sig_handler(sig=None, frame=None):
