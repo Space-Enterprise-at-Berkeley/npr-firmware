@@ -19,12 +19,12 @@ def checkErrorRate(self):
         tP = (self.good_packets + self.bad_packets)
         if (tP > 0):
             erate = self.good_packets / tP
-            print(f"% good in last 2 seconds: {erate*100}, total good packets: {self.good_packets}")
+            print(f"% good in last 2 seconds: {erate*100}, total good packets: {self.good_packets}, effective kBps: {self.lastSecondBytes / 1000}")
         else:
             print(f"% good in last 2 seconds: --")
  
         self.prevTime = time.time()
-        self.good_packets, self.bad_packets = 0, 0
+        self.good_packets, self.bad_packets, self.lastSecondBytes = 0, 0, 0
 
     
 
@@ -165,6 +165,7 @@ def sendover(self, buff):
     f = [ord(i) for i in f]
     f = [len(f)] + f
     f += buff
+    self.lastSecondBytes += buff[1]
     
     self.sock.sendto(bytes(f), (ip, port))
     
@@ -232,6 +233,7 @@ class blk(gr.sync_block):
         self.testctr = 1
         self.lastPacketTime = 0
         self.good_packets, self.bad_packets = 0, 0
+        self.lastSecondBytes = 0
         self.prevTime = 0
         self.rssiDeque = deque(maxlen = 100000)
         self.rssi = 0

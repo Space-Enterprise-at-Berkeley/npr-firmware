@@ -146,7 +146,11 @@ class what(gr.top_block):
 def main(top_block_cls=what, options=None):
     global recordingToFile
     recordingToFile = sys.argv[min(len(sys.argv)-1, 1)] == "--record"
-    print(recordingToFile)
+
+    if recordingToFile: 
+        print("-" * 100)
+        print("| " + " " * 42 + "RECORDING IQ" + " "*42 + " |")
+        print("-"*100)
     tb = top_block_cls()
 
     def sig_handler(sig=None, frame=None):
