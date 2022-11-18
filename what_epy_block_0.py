@@ -95,7 +95,7 @@ def split(self, buff):
     ctr = 0
     try:
         while True:
-            if (len(buff) < 9):
+            if (len(buff) < 8):
                 return
             id = buff[0]
             length = buff[1]
@@ -159,12 +159,12 @@ def sendover(self, buff):
     if testing_check:
         testing_add(self, buff)
 
-
+    realBuff = buff[:8+buff[1]]
     
     f = list(destip)
     f = [ord(i) for i in f]
     f = [len(f)] + f
-    f += buff
+    f += realBuff
     self.lastSecondBytes += buff[1]
     
     self.sock.sendto(bytes(f), (ip, port))
