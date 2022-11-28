@@ -43,7 +43,7 @@ class what(gr.top_block):
         self.fname = fname = "firstrealpls"
         self.file_name = file_name = "temp_write"
         import time
-        file_name = "recordings/"+str(time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime()))
+        file_name = "recordings/"+str(time.strftime("%Y-%m-%d-%H-%M-%S.raw", time.localtime()))
 
         ##################################################
         # Blocks
