@@ -56,7 +56,7 @@ void setup()
 
 int delayS;
 
-long sizePacketPeriod = 1e6;
+long sizePacketPeriod = 1e2;
 long lastTime = micros();
 
 void loop() {
@@ -66,6 +66,8 @@ void loop() {
     Serial.print("transmitting... ");
     Serial.println(cnt++);
     Comms::Packet tmp = {.id = 12};
+    Comms::packetAddFloat(&tmp, 42.0);
+    Comms::packetAddFloat(&tmp, 69.0);
     Radio::forwardPacket(&tmp);
     lastTime = micros();
   }
