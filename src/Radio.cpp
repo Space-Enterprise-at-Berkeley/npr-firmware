@@ -30,14 +30,8 @@ namespace Radio {
         Si446x_setTxPower(127);
         Si446x_setupCallback(SI446X_CBS_SENT, 1); 
 
-        #ifdef FLIGHT
         radioMode = TX;
         DEBUG("Starting in flight mode");
-        #else
-        Si446x_RX(0);
-        radioMode  = RX;
-        DEBUG("Starting in ground mode");
-        #endif
     }
 
     void transmitRadioBuffer(bool swapFlag){

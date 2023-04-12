@@ -6,24 +6,6 @@
 
 namespace Comms {
 
-    const int port = 42069;
-    const IPAddress ip(10, 0, 0, IP_ADDRESS_END);
-    const IPAddress DAQ1(10, 0, 0, 11);
-
-    #ifdef FLIGHT
-    const byte mac[] = {
-    0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0x00
-    };
-    const IPAddress ethDestination1(10, 0, 0, 69);
-    const IPAddress ethDestination2(10, 0, 0, 70);
-    #else
-    const byte mac[] = {
-    0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0x01
-    };
-    const IPAddress ethDestination1(10, 0, 0, 69);
-    const IPAddress ethDestination2(10, 0, 0, 70);
-    #endif
-
 
     struct Packet {
         uint8_t id;

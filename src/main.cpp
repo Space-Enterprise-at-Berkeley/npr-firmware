@@ -3,9 +3,6 @@
 #include <Comms.h>
 #include <Radio.h>
 #include <Si446x.h>
-#include "ReplayFlight.h"
-
-#include <BlackBox.h>
 
 int arr[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
 int ctr = 0;
@@ -38,18 +35,12 @@ void SI446X_CB_RXINVALID(int16_t rssi)
 	Serial.println(F(")"));
 }
 
-Comms::Packet testPacket = {.id = 5};
-
-Comms::Packet sizePacket = {.id = 153};
-
 void setup() 
 {
   Serial.begin(115200);
   Serial.println("starting up");
   
-  Comms::initComms();
   Radio::initRadio();
-  BlackBox::init();
   
   Serial.println("hi");
   Serial.println("HII");
@@ -69,22 +60,14 @@ long sizePacketPeriod = 1e6;
 long lastTime = micros();
 
 void loop() {
-  
-  #ifdef FLIGHT
-  Comms::processWaitingPackets();
   // send blackbox size used
+  static int cnt = 0;
   if (micros() - lastTime > sizePacketPeriod) {
-    sizePacket.len = 0;
-    Comms::packetAddUint32(&sizePacket, (BlackBox::getAddr() / 1000) + (BlackBox::erasing ? 1 : 0));
-    Comms::emitPacket(&sizePacket);
-    BlackBox::writePacket(sizePacket);
+    Serial.print("transmitting... ");
+    Serial.println(cnt++);
+    Comms::Packet tmp = {.id = 12};
+    Radio::forwardPacket(&tmp);
     lastTime = micros();
   }
-  #endif
-
-  #ifdef REPLAY
-  ReplayFlight::startReplay();
-  while(1) {}
-  #endif
-
+  Si446x_SERVICE();
 }
